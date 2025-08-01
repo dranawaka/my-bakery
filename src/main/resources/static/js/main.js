@@ -1132,8 +1132,69 @@ function loadOrdersData() {
 }
 
 function loadCustomersData() {
-    // Implementation will be added later
     console.log('Loading customers data...');
+    
+    // Update customers page content
+    const customersPage = document.getElementById('customers-page');
+    customersPage.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Customers Management</h3>
+            <button id="add-customer-btn" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add New Customer
+            </button>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">Customers List</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" id="customer-search" class="form-control" placeholder="Search customers...">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Addresses</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners
+    document.getElementById('add-customer-btn').addEventListener('click', showAddCustomerModal);
+    
+    // Add event listener for the search input
+    document.getElementById('customer-search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterCustomers(searchTerm);
+    });
+    
+    // Fetch customers from API
+    fetchCustomers();
 }
 
 function loadReportsData() {
@@ -1147,8 +1208,1259 @@ function loadPromotionsData() {
 }
 
 function loadUsersData() {
-    // Implementation will be added later
     console.log('Loading users data...');
+    
+    // Update users page content
+    const usersPage = document.getElementById('users-page');
+    usersPage.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Users Management</h3>
+            <button id="add-user-btn" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add New User
+            </button>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">Users List</h5>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" id="user-search" class="form-control" placeholder="Search users...">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners
+    document.getElementById('add-user-btn').addEventListener('click', showAddUserModal);
+    
+    // Add event listener for the search input
+    document.getElementById('user-search').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        filterUsers(searchTerm);
+    });
+    
+    // Fetch users from API
+    fetchUsers();
+}
+
+// Fetch users from API
+function fetchUsers() {
+    apiService.get('/users')
+        .then(response => {
+            if (response.success) {
+                displayUsers(response.data);
+            } else {
+                showErrorMessage('Failed to load users: ' + response.error.message);
+                document.getElementById('users-table').innerHTML = 
+                    '<tr><td colspan="7" class="text-center text-danger">Failed to load users</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching users:', error);
+            document.getElementById('users-table').innerHTML = 
+                '<tr><td colspan="7" class="text-center text-danger">Failed to load users</td></tr>';
+        });
+}
+
+// Display users in the table
+function displayUsers(users) {
+    const tableBody = document.getElementById('users-table');
+    
+    if (!users || users.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = '';
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-user-id', user.id);
+        
+        row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.firstName} ${user.lastName}</td>
+            <td>${user.email}</td>
+            <td>${user.phone || 'N/A'}</td>
+            <td>
+                <span class="badge ${getRoleBadgeClass(user.role)}">
+                    ${user.role}
+                </span>
+            </td>
+            <td>
+                <span class="badge ${user.active ? 'bg-success' : 'bg-danger'}">
+                    ${user.active ? 'Active' : 'Inactive'}
+                </span>
+                ${user.emailVerified ? '<span class="badge bg-info ms-1">Verified</span>' : ''}
+            </td>
+            <td>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary view-user-btn" data-user-id="${user.id}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary edit-user-btn" data-user-id="${user.id}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-info manage-user-addresses-btn" data-user-id="${user.id}">
+                        <i class="bi bi-geo-alt"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger delete-user-btn" data-user-id="${user.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.view-user-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            viewUser(userId);
+        });
+    });
+    
+    document.querySelectorAll('.edit-user-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            editUser(userId);
+        });
+    });
+    
+    document.querySelectorAll('.manage-user-addresses-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            manageUserAddresses(userId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-user-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            confirmDeleteUser(userId);
+        });
+    });
+}
+
+// Set up event listeners for user management
+function setupUserEventListeners() {
+    const userFormModal = new bootstrap.Modal(document.getElementById('userFormModal'));
+    const addressModal = new bootstrap.Modal(document.getElementById('addressModal'));
+    
+    // Add user button
+    document.getElementById('add-user-btn').addEventListener('click', () => {
+        document.getElementById('userFormModalLabel').textContent = 'Add User';
+        document.getElementById('user-form').reset();
+        document.getElementById('user-id').value = '';
+        document.getElementById('password-hint').style.display = 'none';
+        document.getElementById('user-password').required = true;
+        userFormModal.show();
+    });
+    
+    // Save user button
+    document.getElementById('save-user-btn').addEventListener('click', () => {
+        const form = document.getElementById('user-form');
+        
+        if (form.checkValidity()) {
+            const userId = document.getElementById('user-id').value;
+            const userData = {
+                email: document.getElementById('user-email').value,
+                firstName: document.getElementById('user-first-name').value,
+                lastName: document.getElementById('user-last-name').value,
+                phone: document.getElementById('user-phone').value,
+                role: document.getElementById('user-role').value,
+                active: document.getElementById('user-active').checked
+            };
+            
+            // Add password only if provided or for new users
+            const password = document.getElementById('user-password').value;
+            if (password) {
+                userData.password = password;
+            }
+            
+            if (userId) {
+                // Update existing user
+                apiService.put(`/users/${userId}`, userData)
+                    .then(response => {
+                        userFormModal.hide();
+                        fetchUsers();
+                    })
+                    .catch(error => {
+                        console.error('Error updating user:', error);
+                        alert('Failed to update user. Please try again.');
+                    });
+            } else {
+                // Create new user
+                apiService.post('/users', userData)
+                    .then(response => {
+                        userFormModal.hide();
+                        fetchUsers();
+                    })
+                    .catch(error => {
+                        console.error('Error creating user:', error);
+                        alert('Failed to create user. Please try again.');
+                    });
+            }
+        } else {
+            form.reportValidity();
+        }
+    });
+    
+    // Edit user button (delegated event)
+    document.getElementById('users-page').addEventListener('click', event => {
+        const editBtn = event.target.closest('.edit-user-btn');
+        if (editBtn) {
+            const userId = editBtn.getAttribute('data-user-id');
+            editUser(userId, userFormModal);
+        }
+    });
+    
+    // Delete user button (delegated event)
+    document.getElementById('users-page').addEventListener('click', event => {
+        const deleteBtn = event.target.closest('.delete-user-btn');
+        if (deleteBtn) {
+            const userId = deleteBtn.getAttribute('data-user-id');
+            confirmDeleteUser(userId);
+        }
+    });
+    
+    // Address management button (delegated event)
+    document.getElementById('users-page').addEventListener('click', event => {
+        const addressBtn = event.target.closest('.address-btn');
+        if (addressBtn) {
+            const userId = addressBtn.getAttribute('data-user-id');
+            const userName = addressBtn.getAttribute('data-user-name');
+            manageAddresses(userId, userName, addressModal);
+        }
+    });
+    
+    // Add address button
+    document.getElementById('add-address-btn').addEventListener('click', () => {
+        showAddressForm(true);
+    });
+    
+    // Cancel address button
+    document.getElementById('cancel-address-btn').addEventListener('click', () => {
+        showAddressForm(false);
+    });
+    
+    // Save address button
+    document.getElementById('save-address-btn').addEventListener('click', () => {
+        saveAddress(addressModal);
+    });
+}
+
+// Edit user
+function editUser(userId, modal) {
+    apiService.get(`/users/${userId}`)
+        .then(response => {
+            const user = response.data || response;
+            
+            document.getElementById('userFormModalLabel').textContent = 'Edit User';
+            document.getElementById('user-id').value = user.id;
+            document.getElementById('user-email').value = user.email;
+            document.getElementById('user-password').value = '';
+            document.getElementById('user-password').required = false;
+            document.getElementById('password-hint').style.display = 'block';
+            document.getElementById('user-first-name').value = user.firstName;
+            document.getElementById('user-last-name').value = user.lastName;
+            document.getElementById('user-phone').value = user.phone || '';
+            document.getElementById('user-role').value = user.role;
+            document.getElementById('user-active').checked = user.active;
+            
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error fetching user details:', error);
+            alert('Failed to load user details. Please try again.');
+        });
+}
+
+// Confirm delete user
+function confirmDeleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        apiService.delete(`/users/${userId}`)
+            .then(response => {
+                fetchUsers();
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+                alert('Failed to delete user. Please try again.');
+            });
+    }
+}
+
+// Manage addresses
+function manageAddresses(userId, userName, modal) {
+    document.getElementById('address-user-name').textContent = `${userName}'s Addresses`;
+    document.getElementById('address-user-id').value = userId;
+    
+    // Reset and hide the form
+    document.getElementById('address-form').reset();
+    showAddressForm(false);
+    
+    // Show loading indicator
+    document.getElementById('addresses-container').innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    // Show the modal
+    modal.show();
+    
+    // Fetch addresses
+    fetchAddresses(userId);
+}
+
+// Fetch addresses
+function fetchAddresses(userId) {
+    apiService.get(`/users/addresses`)
+        .then(response => {
+            const addresses = response.data || [];
+            renderAddresses(addresses);
+        })
+        .catch(error => {
+            console.error('Error fetching addresses:', error);
+            document.getElementById('addresses-container').innerHTML = `
+                <div class="alert alert-danger">
+                    Failed to load addresses. Please try again.
+                </div>
+            `;
+        });
+}
+
+// Render addresses
+function renderAddresses(addresses) {
+    const container = document.getElementById('addresses-container');
+    
+    if (addresses.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                No addresses found. Click "Add Address" to create one.
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = addresses.map(address => `
+        <div class="card mb-3" data-address-id="${address.id}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h6 class="card-title">
+                        ${address.type} Address
+                        ${address.default ? '<span class="badge bg-primary ms-2">Default</span>' : ''}
+                    </h6>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary edit-address-btn" data-address-id="${address.id}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger delete-address-btn" data-address-id="${address.id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="card-text">
+                    ${address.addressLine1}<br>
+                    ${address.addressLine2 ? address.addressLine2 + '<br>' : ''}
+                    ${address.city}, ${address.state} ${address.postalCode}<br>
+                    ${address.country}
+                    ${address.phone ? '<br>Phone: ' + address.phone : ''}
+                </p>
+            </div>
+        </div>
+    `).join('');
+    
+    // Add event listeners for address actions
+    setupAddressEventListeners();
+}
+
+// Set up event listeners for address actions
+function setupAddressEventListeners() {
+    // Edit address button
+    document.querySelectorAll('.edit-address-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const addressId = btn.getAttribute('data-address-id');
+            editAddress(addressId);
+        });
+    });
+    
+    // Delete address button
+    document.querySelectorAll('.delete-address-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const addressId = btn.getAttribute('data-address-id');
+            confirmDeleteAddress(addressId);
+        });
+    });
+}
+
+// Show/hide address form
+function showAddressForm(show) {
+    const form = document.getElementById('address-form');
+    const container = document.getElementById('addresses-container');
+    
+    if (show) {
+        form.classList.remove('d-none');
+        container.classList.add('d-none');
+    } else {
+        form.classList.add('d-none');
+        container.classList.remove('d-none');
+    }
+}
+
+// Edit address
+function editAddress(addressId) {
+    apiService.get(`/users/addresses/${addressId}`)
+        .then(response => {
+            const address = response.data || response;
+            
+            document.getElementById('address-id').value = address.id;
+            document.getElementById('address-line1').value = address.addressLine1;
+            document.getElementById('address-line2').value = address.addressLine2 || '';
+            document.getElementById('address-city').value = address.city;
+            document.getElementById('address-state').value = address.state;
+            document.getElementById('address-postal-code').value = address.postalCode;
+            document.getElementById('address-country').value = address.country;
+            document.getElementById('address-phone').value = address.phone || '';
+            document.getElementById('address-type').value = address.type;
+            document.getElementById('address-default').checked = address.default;
+            
+            showAddressForm(true);
+        })
+        .catch(error => {
+            console.error('Error fetching address details:', error);
+            alert('Failed to load address details. Please try again.');
+        });
+}
+
+// Save address
+function saveAddress(modal) {
+    const form = document.getElementById('address-form');
+    
+    if (form.checkValidity()) {
+        const addressId = document.getElementById('address-id').value;
+        const userId = document.getElementById('address-user-id').value;
+        
+        const addressData = {
+            addressLine1: document.getElementById('address-line1').value,
+            addressLine2: document.getElementById('address-line2').value,
+            city: document.getElementById('address-city').value,
+            state: document.getElementById('address-state').value,
+            postalCode: document.getElementById('address-postal-code').value,
+            country: document.getElementById('address-country').value,
+            phone: document.getElementById('address-phone').value,
+            type: document.getElementById('address-type').value,
+            default: document.getElementById('address-default').checked
+        };
+        
+        if (addressId) {
+            // Update existing address
+            apiService.put(`/users/addresses/${addressId}`, addressData)
+                .then(response => {
+                    showAddressForm(false);
+                    fetchAddresses(userId);
+                })
+                .catch(error => {
+                    console.error('Error updating address:', error);
+                    alert('Failed to update address. Please try again.');
+                });
+        } else {
+            // Create new address
+            apiService.post('/users/addresses', addressData)
+                .then(response => {
+                    showAddressForm(false);
+                    fetchAddresses(userId);
+                })
+                .catch(error => {
+                    console.error('Error creating address:', error);
+                    alert('Failed to create address. Please try again.');
+                });
+        }
+    } else {
+        form.reportValidity();
+    }
+}
+
+// Confirm delete address
+function confirmDeleteAddress(addressId) {
+    if (confirm('Are you sure you want to delete this address? This action cannot be undone.')) {
+        const userId = document.getElementById('address-user-id').value;
+        
+        apiService.delete(`/users/addresses/${addressId}`)
+            .then(response => {
+                fetchAddresses(userId);
+            })
+            .catch(error => {
+                console.error('Error deleting address:', error);
+                alert('Failed to delete address. Please try again.');
+            });
+    }
+}
+
+// Get role badge class
+function getRoleBadgeClass(role) {
+    switch (role) {
+        case 'ADMIN':
+            return 'danger';
+        case 'MANAGER':
+            return 'warning';
+        case 'STAFF':
+            return 'info';
+        case 'CUSTOMER':
+            return 'success';
+        default:
+            return 'secondary';
+    }
+}
+
+// Fetch customers from API
+function fetchCustomers() {
+    apiService.get('/users')
+        .then(response => {
+            if (response.success) {
+                // Filter only customers
+                const customers = response.data.filter(user => user.role === 'CUSTOMER');
+                displayCustomers(customers);
+            } else {
+                showErrorMessage('Failed to load customers: ' + response.error.message);
+                document.getElementById('customers-table').innerHTML = 
+                    '<tr><td colspan="7" class="text-center text-danger">Failed to load customers</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching customers:', error);
+            document.getElementById('customers-table').innerHTML = 
+                '<tr><td colspan="7" class="text-center text-danger">Failed to load customers</td></tr>';
+        });
+}
+
+// Display customers in the table
+function displayCustomers(customers) {
+    const tableBody = document.getElementById('customers-table');
+    
+    if (!customers || customers.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No customers found</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = '';
+    
+    customers.forEach(customer => {
+        const row = document.createElement('tr');
+        row.setAttribute('data-customer-id', customer.id);
+        
+        row.innerHTML = `
+            <td>${customer.id}</td>
+            <td>${customer.firstName} ${customer.lastName}</td>
+            <td>${customer.email}</td>
+            <td>${customer.phone || 'N/A'}</td>
+            <td>
+                <span class="badge ${customer.active ? 'bg-success' : 'bg-danger'}">
+                    ${customer.active ? 'Active' : 'Inactive'}
+                </span>
+                ${customer.emailVerified ? '<span class="badge bg-info ms-1">Verified</span>' : ''}
+            </td>
+            <td>
+                <span class="badge bg-secondary">${customer.addresses ? customer.addresses.length : 0} addresses</span>
+            </td>
+            <td>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary view-customer-btn" data-customer-id="${customer.id}">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary edit-customer-btn" data-customer-id="${customer.id}">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-info manage-addresses-btn" data-customer-id="${customer.id}">
+                        <i class="bi bi-geo-alt"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger delete-customer-btn" data-customer-id="${customer.id}">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
+    });
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.view-customer-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const customerId = this.getAttribute('data-customer-id');
+            viewCustomer(customerId);
+        });
+    });
+    
+    document.querySelectorAll('.edit-customer-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const customerId = this.getAttribute('data-customer-id');
+            editCustomer(customerId);
+        });
+    });
+    
+    document.querySelectorAll('.manage-addresses-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const customerId = this.getAttribute('data-customer-id');
+            manageCustomerAddresses(customerId);
+        });
+    });
+    
+    document.querySelectorAll('.delete-customer-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const customerId = this.getAttribute('data-customer-id');
+            confirmDeleteCustomer(customerId);
+        });
+    });
+}
+
+// Filter customers based on search term
+function filterCustomers(searchTerm) {
+    const rows = document.querySelectorAll('#customers-table tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Show add customer modal
+function showAddCustomerModal() {
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="customerModalLabel">Add New Customer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="customer-form">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="customer-first-name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="customer-first-name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customer-last-name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="customer-last-name" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="customer-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="customer-email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customer-phone" class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="customer-phone">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="customer-password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="customer-password" required>
+                                <small class="text-muted">Minimum 6 characters</small>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="customer-active" checked>
+                                <label class="form-check-label" for="customer-active">Active</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="customer-email-verified">
+                                <label class="form-check-label" for="customer-email-verified">Email Verified</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="save-customer-btn">Save Customer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to the DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+    
+    // Initialize the modal
+    const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+    modal.show();
+    
+    // Add event listener to save button
+    document.getElementById('save-customer-btn').addEventListener('click', saveCustomer);
+    
+    // Clean up when modal is hidden
+    document.getElementById('customerModal').addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modalContainer);
+    });
+}
+
+// Save customer (create new or update existing)
+function saveCustomer() {
+    const customerId = document.getElementById('customer-form').getAttribute('data-customer-id');
+    
+    const customerData = {
+        firstName: document.getElementById('customer-first-name').value,
+        lastName: document.getElementById('customer-last-name').value,
+        email: document.getElementById('customer-email').value,
+        phone: document.getElementById('customer-phone').value,
+        password: document.getElementById('customer-password').value,
+        role: 'CUSTOMER',
+        active: document.getElementById('customer-active').checked,
+        emailVerified: document.getElementById('customer-email-verified').checked
+    };
+    
+    // Validate required fields
+    if (!customerData.firstName || !customerData.lastName || !customerData.email || !customerData.password) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    if (customerData.password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+    }
+    
+    // Determine if this is a create or update operation
+    const isUpdate = !!customerId;
+    const endpoint = isUpdate ? `/users/${customerId}` : '/users';
+    const method = isUpdate ? 'put' : 'post';
+    
+    // Remove password from update if it's empty (keep existing password)
+    if (isUpdate && !customerData.password) {
+        delete customerData.password;
+    }
+    
+    // Save the customer
+    apiService[method](endpoint, customerData)
+        .then(response => {
+            if (response.success) {
+                // Close the modal
+                bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+                
+                // Refresh the customers list
+                fetchCustomers();
+                
+                // Show success message
+                alert(`Customer ${isUpdate ? 'updated' : 'created'} successfully`);
+            } else {
+                alert('Failed to save customer: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error saving customer:', error);
+            alert('Failed to save customer. Please try again.');
+        });
+}
+
+// View customer details
+function viewCustomer(customerId) {
+    apiService.get(`/users/${customerId}`)
+        .then(response => {
+            if (response.success) {
+                const customer = response.data;
+                
+                // Create modal HTML
+                const modalHTML = `
+                    <div class="modal fade" id="viewCustomerModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Customer Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h4>${customer.firstName} ${customer.lastName}</h4>
+                                            <p class="text-muted">${customer.email}</p>
+                                            
+                                            <h5>Contact Information</h5>
+                                            <p>Phone: ${customer.phone || 'N/A'}</p>
+                                            <p>Email: ${customer.email}</p>
+                                            
+                                            <h5>Status</h5>
+                                            <p>
+                                                <span class="badge ${customer.active ? 'bg-success' : 'bg-danger'}">
+                                                    ${customer.active ? 'Active' : 'Inactive'}
+                                                </span>
+                                                ${customer.emailVerified ? '<span class="badge bg-info ms-2">Email Verified</span>' : ''}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Addresses (${customer.addresses ? customer.addresses.length : 0})</h5>
+                                            ${customer.addresses && customer.addresses.length > 0 ? 
+                                                customer.addresses.map(address => `
+                                                    <div class="card mb-2">
+                                                        <div class="card-body">
+                                                            <p class="mb-1">${address.streetAddress}</p>
+                                                            <p class="mb-1">${address.city}, ${address.state} ${address.postalCode}</p>
+                                                            <p class="mb-0 text-muted">${address.country}</p>
+                                                        </div>
+                                                    </div>
+                                                `).join('') : 
+                                                '<p class="text-muted">No addresses on file</p>'
+                                            }
+                                            
+                                            <h5>Account Information</h5>
+                                            <p>Member since: ${formatDate(customer.createdAt)}</p>
+                                            <p>Last updated: ${formatDate(customer.updatedAt)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to the DOM
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modalHTML;
+                document.body.appendChild(modalContainer);
+                
+                // Initialize the modal
+                const modal = new bootstrap.Modal(document.getElementById('viewCustomerModal'));
+                modal.show();
+                
+                // Clean up when modal is hidden
+                document.getElementById('viewCustomerModal').addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalContainer);
+                });
+            } else {
+                alert('Failed to load customer: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading customer:', error);
+            alert('Failed to load customer. Please try again.');
+        });
+}
+
+// Edit customer
+function editCustomer(customerId) {
+    apiService.get(`/users/${customerId}`)
+        .then(response => {
+            if (response.success) {
+                const customer = response.data;
+                
+                // Show the customer modal
+                showAddCustomerModal();
+                
+                // Wait for modal to be created, then populate it
+                setTimeout(() => {
+                    document.getElementById('customerModalLabel').textContent = 'Edit Customer';
+                    document.getElementById('customer-form').setAttribute('data-customer-id', customer.id);
+                    document.getElementById('customer-first-name').value = customer.firstName;
+                    document.getElementById('customer-last-name').value = customer.lastName;
+                    document.getElementById('customer-email').value = customer.email;
+                    document.getElementById('customer-phone').value = customer.phone || '';
+                    document.getElementById('customer-password').value = ''; // Don't show password
+                    document.getElementById('customer-password').required = false; // Not required for edit
+                    document.getElementById('customer-active').checked = customer.active;
+                    document.getElementById('customer-email-verified').checked = customer.emailVerified;
+                }, 100);
+            } else {
+                alert('Failed to load customer: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading customer:', error);
+            alert('Failed to load customer. Please try again.');
+        });
+}
+
+// Confirm delete customer
+function confirmDeleteCustomer(customerId) {
+    if (confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+        deleteCustomer(customerId);
+    }
+}
+
+// Delete customer
+function deleteCustomer(customerId) {
+    apiService.delete(`/users/${customerId}`)
+        .then(response => {
+            if (response.success) {
+                // Refresh the customers list
+                fetchCustomers();
+                
+                // Show success message
+                alert('Customer deleted successfully');
+            } else {
+                alert('Failed to delete customer: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting customer:', error);
+            alert('Failed to delete customer. Please try again.');
+        });
+}
+
+// Manage customer addresses
+function manageCustomerAddresses(customerId) {
+    // This will be implemented to show a modal for managing customer addresses
+    alert('Address management feature will be implemented in the next update');
+}
+
+// Filter users based on search term
+function filterUsers(searchTerm) {
+    const rows = document.querySelectorAll('#users-table tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+// Show add user modal
+function showAddUserModal() {
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="userModalLabel">Add New User</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="user-form">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="user-first-name" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="user-first-name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="user-last-name" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="user-last-name" required>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="user-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="user-email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="user-phone" class="form-label">Phone</label>
+                                    <input type="text" class="form-control" id="user-phone">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="user-password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="user-password" required>
+                                    <small class="text-muted">Minimum 6 characters</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="user-role" class="form-label">Role</label>
+                                    <select class="form-select" id="user-role" required>
+                                        <option value="CUSTOMER">Customer</option>
+                                        <option value="STAFF">Staff</option>
+                                        <option value="MANAGER">Manager</option>
+                                        <option value="ADMIN">Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="user-active" checked>
+                                <label class="form-check-label" for="user-active">Active</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="user-email-verified">
+                                <label class="form-check-label" for="user-email-verified">Email Verified</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="save-user-btn">Save User</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to the DOM
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+    
+    // Initialize the modal
+    const modal = new bootstrap.Modal(document.getElementById('userModal'));
+    modal.show();
+    
+    // Add event listener to save button
+    document.getElementById('save-user-btn').addEventListener('click', saveUser);
+    
+    // Clean up when modal is hidden
+    document.getElementById('userModal').addEventListener('hidden.bs.modal', function() {
+        document.body.removeChild(modalContainer);
+    });
+}
+
+// Save user (create new or update existing)
+function saveUser() {
+    const userId = document.getElementById('user-form').getAttribute('data-user-id');
+    
+    const userData = {
+        firstName: document.getElementById('user-first-name').value,
+        lastName: document.getElementById('user-last-name').value,
+        email: document.getElementById('user-email').value,
+        phone: document.getElementById('user-phone').value,
+        password: document.getElementById('user-password').value,
+        role: document.getElementById('user-role').value,
+        active: document.getElementById('user-active').checked,
+        emailVerified: document.getElementById('user-email-verified').checked
+    };
+    
+    // Validate required fields
+    if (!userData.firstName || !userData.lastName || !userData.email || !userData.password) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    if (userData.password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+    }
+    
+    // Determine if this is a create or update operation
+    const isUpdate = !!userId;
+    const endpoint = isUpdate ? `/users/${userId}` : '/users';
+    const method = isUpdate ? 'put' : 'post';
+    
+    // Remove password from update if it's empty (keep existing password)
+    if (isUpdate && !userData.password) {
+        delete userData.password;
+    }
+    
+    // Save the user
+    apiService[method](endpoint, userData)
+        .then(response => {
+            if (response.success) {
+                // Close the modal
+                bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+                
+                // Refresh the users list
+                fetchUsers();
+                
+                // Show success message
+                alert(`User ${isUpdate ? 'updated' : 'created'} successfully`);
+            } else {
+                alert('Failed to save user: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error saving user:', error);
+            alert('Failed to save user. Please try again.');
+        });
+}
+
+// View user details
+function viewUser(userId) {
+    apiService.get(`/users/${userId}`)
+        .then(response => {
+            if (response.success) {
+                const user = response.data;
+                
+                // Create modal HTML
+                const modalHTML = `
+                    <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">User Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h4>${user.firstName} ${user.lastName}</h4>
+                                            <p class="text-muted">${user.email}</p>
+                                            
+                                            <h5>Contact Information</h5>
+                                            <p>Phone: ${user.phone || 'N/A'}</p>
+                                            <p>Email: ${user.email}</p>
+                                            
+                                            <h5>Role & Status</h5>
+                                            <p>
+                                                <span class="badge ${getRoleBadgeClass(user.role)}">
+                                                    ${user.role}
+                                                </span>
+                                            </p>
+                                            <p>
+                                                <span class="badge ${user.active ? 'bg-success' : 'bg-danger'}">
+                                                    ${user.active ? 'Active' : 'Inactive'}
+                                                </span>
+                                                ${user.emailVerified ? '<span class="badge bg-info ms-2">Email Verified</span>' : ''}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Addresses (${user.addresses ? user.addresses.length : 0})</h5>
+                                            ${user.addresses && user.addresses.length > 0 ? 
+                                                user.addresses.map(address => `
+                                                    <div class="card mb-2">
+                                                        <div class="card-body">
+                                                            <p class="mb-1">${address.streetAddress}</p>
+                                                            <p class="mb-1">${address.city}, ${address.state} ${address.postalCode}</p>
+                                                            <p class="mb-0 text-muted">${address.country}</p>
+                                                        </div>
+                                                    </div>
+                                                `).join('') : 
+                                                '<p class="text-muted">No addresses on file</p>'
+                                            }
+                                            
+                                            <h5>Account Information</h5>
+                                            <p>Member since: ${formatDate(user.createdAt)}</p>
+                                            <p>Last updated: ${formatDate(user.updatedAt)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to the DOM
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modalHTML;
+                document.body.appendChild(modalContainer);
+                
+                // Initialize the modal
+                const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+                modal.show();
+                
+                // Clean up when modal is hidden
+                document.getElementById('viewUserModal').addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalContainer);
+                });
+            } else {
+                alert('Failed to load user: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading user:', error);
+            alert('Failed to load user. Please try again.');
+        });
+}
+
+// Edit user
+function editUser(userId) {
+    apiService.get(`/users/${userId}`)
+        .then(response => {
+            if (response.success) {
+                const user = response.data;
+                
+                // Show the user modal
+                showAddUserModal();
+                
+                // Wait for modal to be created, then populate it
+                setTimeout(() => {
+                    document.getElementById('userModalLabel').textContent = 'Edit User';
+                    document.getElementById('user-form').setAttribute('data-user-id', user.id);
+                    document.getElementById('user-first-name').value = user.firstName;
+                    document.getElementById('user-last-name').value = user.lastName;
+                    document.getElementById('user-email').value = user.email;
+                    document.getElementById('user-phone').value = user.phone || '';
+                    document.getElementById('user-password').value = ''; // Don't show password
+                    document.getElementById('user-password').required = false; // Not required for edit
+                    document.getElementById('user-role').value = user.role;
+                    document.getElementById('user-active').checked = user.active;
+                    document.getElementById('user-email-verified').checked = user.emailVerified;
+                }, 100);
+            } else {
+                alert('Failed to load user: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading user:', error);
+            alert('Failed to load user. Please try again.');
+        });
+}
+
+// Confirm delete user
+function confirmDeleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        deleteUser(userId);
+    }
+}
+
+// Delete user
+function deleteUser(userId) {
+    apiService.delete(`/users/${userId}`)
+        .then(response => {
+            if (response.success) {
+                // Refresh the users list
+                fetchUsers();
+                
+                // Show success message
+                alert('User deleted successfully');
+            } else {
+                alert('Failed to delete user: ' + response.error.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting user:', error);
+            alert('Failed to delete user. Please try again.');
+        });
+}
+
+// Manage user addresses
+function manageUserAddresses(userId) {
+    // This will be implemented to show a modal for managing user addresses
+    alert('Address management feature will be implemented in the next update');
 }
 
 function loadSettingsData() {

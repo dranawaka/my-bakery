@@ -68,6 +68,9 @@ public class DataInitializer {
             
             // Create sample products if they don't exist
             createSampleProducts(categoryRepository, productRepository);
+            
+            // Create sample customers if they don't exist
+            createSampleCustomers(userRepository, passwordEncoder);
         };
     }
     
@@ -214,5 +217,70 @@ public class DataInitializer {
         }
         
         System.out.println("Sample products created successfully");
+    }
+    
+    /**
+     * Creates sample customers for the bakery.
+     */
+    private void createSampleCustomers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        // Check if customers already exist
+        if (userRepository.count() > 1) { // More than just the admin user
+            return;
+        }
+        
+        // Create sample customers
+        User customer1 = new User();
+        customer1.setEmail("john.doe@example.com");
+        customer1.setPassword(passwordEncoder.encode("password123"));
+        customer1.setFirstName("John");
+        customer1.setLastName("Doe");
+        customer1.setPhone("555-0101");
+        customer1.setRole(User.Role.CUSTOMER);
+        customer1.setEmailVerified(true);
+        customer1.setActive(true);
+        customer1.setCreatedAt(LocalDateTime.now());
+        customer1.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(customer1);
+        
+        User customer2 = new User();
+        customer2.setEmail("jane.smith@example.com");
+        customer2.setPassword(passwordEncoder.encode("password123"));
+        customer2.setFirstName("Jane");
+        customer2.setLastName("Smith");
+        customer2.setPhone("555-0102");
+        customer2.setRole(User.Role.CUSTOMER);
+        customer2.setEmailVerified(true);
+        customer2.setActive(true);
+        customer2.setCreatedAt(LocalDateTime.now());
+        customer2.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(customer2);
+        
+        User staff1 = new User();
+        staff1.setEmail("bob.baker@mybakery.com");
+        staff1.setPassword(passwordEncoder.encode("password123"));
+        staff1.setFirstName("Bob");
+        staff1.setLastName("Baker");
+        staff1.setPhone("555-0201");
+        staff1.setRole(User.Role.STAFF);
+        staff1.setEmailVerified(true);
+        staff1.setActive(true);
+        staff1.setCreatedAt(LocalDateTime.now());
+        staff1.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(staff1);
+        
+        User manager1 = new User();
+        manager1.setEmail("sarah.manager@mybakery.com");
+        manager1.setPassword(passwordEncoder.encode("password123"));
+        manager1.setFirstName("Sarah");
+        manager1.setLastName("Manager");
+        manager1.setPhone("555-0301");
+        manager1.setRole(User.Role.MANAGER);
+        manager1.setEmailVerified(true);
+        manager1.setActive(true);
+        manager1.setCreatedAt(LocalDateTime.now());
+        manager1.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(manager1);
+        
+        System.out.println("Sample customers and staff created successfully");
     }
 }

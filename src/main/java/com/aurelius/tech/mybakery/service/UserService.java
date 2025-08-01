@@ -2,9 +2,11 @@ package com.aurelius.tech.mybakery.service;
 
 import com.aurelius.tech.mybakery.model.Address;
 import com.aurelius.tech.mybakery.model.User;
+import com.aurelius.tech.mybakery.repository.AddressRepository;
 import com.aurelius.tech.mybakery.repository.UserRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,15 +17,18 @@ import java.util.Optional;
  * This is a simplified version without Spring Security dependencies.
  */
 @Service
+@Transactional
 public class UserService {
     
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
     
     /**
      * Constructor with dependencies.
      */
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, AddressRepository addressRepository) {
         this.userRepository = userRepository;
+        this.addressRepository = addressRepository;
     }
     
     /**
@@ -179,7 +184,6 @@ public class UserService {
     
     /**
      * Add an address to a user.
-     * In a real implementation, this would be handled by an AddressRepository.
      *
      * @param userId the user's ID
      * @param address the address to add
@@ -189,28 +193,118 @@ public class UserService {
     public Address addUserAddress(Long userId, Address address) {
         // Get the user
         User user = getUserById(userId);
-    
-        // In a real implementation, we would use an AddressRepository
-        // For now, we'll just return the address with an ID
-        address.setId(1L); // Simulated ID
+        
+        // Set the user and timestamps
         address.setUser(user);
         address.setCreatedAt(LocalDateTime.now());
         address.setUpdatedAt(LocalDateTime.now());
-    
-        return address;
+        
+        // If this is set as default address, unset any existing default
+        if (address.isDefault()) {
+            addressRepository.findByUserIdAndIsDefault(userId, true)
+                .ifPresent(defaultAddress -> {
+                    defaultAddress.setDefault(false);
+                    addressRepository.save(defaultAddress);
+                });
+        }
+        
+        // Save the address
+        return addressRepository.save(address);
     }
     
     /**
      * Get a user's addresses.
-     * In a real implementation, this would be handled by an AddressRepository.
      *
      * @param userId the user's ID
      * @return a list of the user's addresses
      * @throws RuntimeException if the user is not found
      */
     public List<Address> getUserAddresses(Long userId) {
-        // In a real implementation, we would use an AddressRepository
-        // For now, we'll just return an empty list
-        return List.of();
+        // Verify the user exists
+        getUserById(userId);
+        
+        // Return the user's addresses
+        return addressRepository.findByUserId(userId);
+    }
+    
+    /**
+     * Update a user's address.
+     *
+     * @param userId the user's ID
+     * @param addressId the address ID
+     * @param updatedAddress the updated address information
+     * @return the updated address
+     * @throws RuntimeException if the address is not found or doesn't belong to the user
+     */
+    public Address updateUserAddress(Long userId, Long addressId, Address updatedAddress) {
+        // Find the address for this user
+        Address existingAddress = addressRepository.findByIdAndUserId(addressId, userId)
+            .orElseThrow(() -> new RuntimeException("Address not found or doesn't belong to the user"));
+        
+        // Update the address fields
+        if (updatedAddress.getAddressLine1() != null) {
+            existingAddress.setAddressLine1(updatedAddress.getAddressLine1());
+        }
+        
+        if (updatedAddress.getAddressLine2() != null) {
+            existingAddress.setAddressLine2(updatedAddress.getAddressLine2());
+        }
+        
+        if (updatedAddress.getCity() != null) {
+            existingAddress.setCity(updatedAddress.getCity());
+        }
+        
+        if (updatedAddress.getState() != null) {
+            existingAddress.setState(updatedAddress.getState());
+        }
+        
+        if (updatedAddress.getPostalCode() != null) {
+            existingAddress.setPostalCode(updatedAddress.getPostalCode());
+        }
+        
+        if (updatedAddress.getCountry() != null) {
+            existingAddress.setCountry(updatedAddress.getCountry());
+        }
+        
+        if (updatedAddress.getPhone() != null) {
+            existingAddress.setPhone(updatedAddress.getPhone());
+        }
+        
+        if (updatedAddress.getType() != null) {
+            existingAddress.setType(updatedAddress.getType());
+        }
+        
+        // Handle default address status
+        if (updatedAddress.isDefault() && !existingAddress.isDefault()) {
+            // Unset any existing default address
+            addressRepository.findByUserIdAndIsDefault(userId, true)
+                .ifPresent(defaultAddress -> {
+                    defaultAddress.setDefault(false);
+                    addressRepository.save(defaultAddress);
+                });
+            
+            existingAddress.setDefault(true);
+        }
+        
+        existingAddress.setUpdatedAt(LocalDateTime.now());
+        
+        // Save and return the updated address
+        return addressRepository.save(existingAddress);
+    }
+    
+    /**
+     * Delete a user's address.
+     *
+     * @param userId the user's ID
+     * @param addressId the address ID
+     * @throws RuntimeException if the address is not found or doesn't belong to the user
+     */
+    public void deleteUserAddress(Long userId, Long addressId) {
+        // Find the address for this user
+        Address address = addressRepository.findByIdAndUserId(addressId, userId)
+            .orElseThrow(() -> new RuntimeException("Address not found or doesn't belong to the user"));
+        
+        // Delete the address
+        addressRepository.delete(address);
     }
 }

@@ -2,6 +2,7 @@ package com.aurelius.tech.mybakery.controller;
 
 import com.aurelius.tech.mybakery.model.Address;
 import com.aurelius.tech.mybakery.model.User;
+import com.aurelius.tech.mybakery.security.JwtTokenProvider;
 import com.aurelius.tech.mybakery.service.UserService;
 
 import org.springframework.http.HttpStatus;
@@ -15,20 +16,37 @@ import java.util.Map;
 
 /**
  * Controller for handling user-related endpoints.
- * This is a simplified version without Spring Security dependencies.
  */
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.OPTIONS})
+@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
     
     /**
      * Constructor with dependencies.
      */
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtTokenProvider jwtTokenProvider) {
         this.userService = userService;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+    
+    /**
+     * Extract user ID from JWT token.
+     * 
+     * @param token the JWT token
+     * @return the user ID
+     */
+    private Long getUserIdFromToken(String token) {
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        
+        String username = jwtTokenProvider.getUsername(token);
+        User user = userService.getUserByEmail(username);
+        return user.getId();
     }
     
     /**
@@ -39,9 +57,7 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile(@RequestHeader("Authorization") String token) {
         try {
-            // In a real implementation, we would extract the user ID from the JWT token
-            // For now, we'll just use a simulated user ID
-            Long userId = 1L;
+            Long userId = getUserIdFromToken(token);
             User user = userService.getUserById(userId);
             
             return createSuccessResponse("User profile retrieved successfully", user);
@@ -59,9 +75,7 @@ public class UserController {
     @PutMapping("/profile")
     public ResponseEntity<?> updateUserProfile(@RequestHeader("Authorization") String token, @RequestBody User user) {
         try {
-            // In a real implementation, we would extract the user ID from the JWT token
-            // For now, we'll just use a simulated user ID
-            Long userId = 1L;
+            Long userId = getUserIdFromToken(token);
             User updatedUser = userService.updateUserProfile(userId, user);
             
             return createSuccessResponse("User profile updated successfully", updatedUser);
@@ -143,9 +157,7 @@ public class UserController {
     @PostMapping("/addresses")
     public ResponseEntity<?> addUserAddress(@RequestHeader("Authorization") String token, @RequestBody Address address) {
         try {
-            // In a real implementation, we would extract the user ID from the JWT token
-            // For now, we'll just use a simulated user ID
-            Long userId = 1L;
+            Long userId = getUserIdFromToken(token);
             Address addedAddress = userService.addUserAddress(userId, address);
             
             return createSuccessResponse("Address added successfully", addedAddress);
@@ -162,9 +174,7 @@ public class UserController {
     @GetMapping("/addresses")
     public ResponseEntity<?> getUserAddresses(@RequestHeader("Authorization") String token) {
         try {
-            // In a real implementation, we would extract the user ID from the JWT token
-            // For now, we'll just use a simulated user ID
-            Long userId = 1L;
+            Long userId = getUserIdFromToken(token);
             List<Address> addresses = userService.getUserAddresses(userId);
             
             return createSuccessResponse("Addresses retrieved successfully", addresses);
@@ -183,11 +193,10 @@ public class UserController {
     @PutMapping("/addresses/{id}")
     public ResponseEntity<?> updateUserAddress(@RequestHeader("Authorization") String token, @PathVariable Long id, @RequestBody Address address) {
         try {
-            // In a real implementation, we would update the address
-            // For now, we'll just return the address with the updated ID
-            address.setId(id);
+            Long userId = getUserIdFromToken(token);
+            Address updatedAddress = userService.updateUserAddress(userId, id, address);
             
-            return createSuccessResponse("Address updated successfully", address);
+            return createSuccessResponse("Address updated successfully", updatedAddress);
         } catch (Exception e) {
             return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -202,8 +211,9 @@ public class UserController {
     @DeleteMapping("/addresses/{id}")
     public ResponseEntity<?> deleteUserAddress(@RequestHeader("Authorization") String token, @PathVariable Long id) {
         try {
-            // In a real implementation, we would delete the address
-            // For now, we'll just return a success message
+            Long userId = getUserIdFromToken(token);
+            userService.deleteUserAddress(userId, id);
+            
             return createSuccessResponse("Address deleted successfully", null);
         } catch (Exception e) {
             return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
