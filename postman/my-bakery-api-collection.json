@@ -1137,7 +1137,286 @@
     {
       "name": "Inventory Management",
       "description": "Endpoints for managing inventory",
-      "item": []
+      "item": [
+        {
+          "name": "Get All Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory"]
+            },
+            "description": "Get all inventory records"
+          }
+        },
+        {
+          "name": "Get Inventory by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "1"]
+            },
+            "description": "Get an inventory record by ID"
+          }
+        },
+        {
+          "name": "Get Inventory by Product ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/product/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "product", "1"]
+            },
+            "description": "Get an inventory record by product ID"
+          }
+        },
+        {
+          "name": "Create Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"quantity\": 50,\n  \"reorderPoint\": 10,\n  \"reorderQuantity\": 20,\n  \"expiryDate\": \"2023-12-31T00:00:00\",\n  \"batchNumber\": \"BATCH-001\",\n  \"location\": \"Main Warehouse\"\n}"
+            },
+            "description": "Create a new inventory record"
+          }
+        },
+        {
+          "name": "Update Inventory Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/1/quantity?quantity=60",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "1", "quantity"],
+              "query": [
+                {
+                  "key": "quantity",
+                  "value": "60"
+                }
+              ]
+            },
+            "description": "Update inventory quantity"
+          }
+        },
+        {
+          "name": "Update Inventory by Product ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/product/1/quantity?quantity=60",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "product", "1", "quantity"],
+              "query": [
+                {
+                  "key": "quantity",
+                  "value": "60"
+                }
+              ]
+            },
+            "description": "Update inventory by product ID"
+          }
+        },
+        {
+          "name": "Increase Inventory",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/product/1/increase?quantity=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "product", "1", "increase"],
+              "query": [
+                {
+                  "key": "quantity",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Increase inventory quantity"
+          }
+        },
+        {
+          "name": "Decrease Inventory",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/product/1/decrease?quantity=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "product", "1", "decrease"],
+              "query": [
+                {
+                  "key": "quantity",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Decrease inventory quantity"
+          }
+        },
+        {
+          "name": "Check if Product is in Stock",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/product/1/in-stock?quantity=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "product", "1", "in-stock"],
+              "query": [
+                {
+                  "key": "quantity",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Check if a product is in stock"
+          }
+        },
+        {
+          "name": "Delete Inventory",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "1"]
+            },
+            "description": "Delete an inventory record"
+          }
+        },
+        {
+          "name": "Get Low Stock Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/low-stock",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "low-stock"]
+            },
+            "description": "Get low stock inventory"
+          }
+        },
+        {
+          "name": "Get Out of Stock Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/out-of-stock",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "out-of-stock"]
+            },
+            "description": "Get out of stock inventory"
+          }
+        },
+        {
+          "name": "Get Expiring Inventory",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/expiring?date=2023-12-31T00:00:00",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "expiring"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2023-12-31T00:00:00"
+                }
+              ]
+            },
+            "description": "Get expiring inventory"
+          }
+        }
+      ]
     },
     {
       "name": "Payment Processing",
