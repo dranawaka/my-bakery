@@ -1421,7 +1421,176 @@
     {
       "name": "Payment Processing",
       "description": "Endpoints for processing payments",
-      "item": []
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "process"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": 1,\n  \"paymentMethod\": \"CREDIT_CARD\"\n}"
+            },
+            "description": "Create a new payment for an order"
+          }
+        },
+        {
+          "name": "Process Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/1/process",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "1", "process"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardNumber\": \"4111111111111111\",\n  \"expiryMonth\": \"12\",\n  \"expiryYear\": \"2025\",\n  \"cvv\": \"123\",\n  \"cardholderName\": \"John Doe\"\n}"
+            },
+            "description": "Process a payment"
+          }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "1"]
+            },
+            "description": "Get a payment by ID"
+          }
+        },
+        {
+          "name": "Get Payments by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/order/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "order", "1"]
+            },
+            "description": "Get payments by order ID"
+          }
+        },
+        {
+          "name": "Process Refund",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/1/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "1", "refund"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 25.99,\n  \"reason\": \"Customer requested refund\"\n}"
+            },
+            "description": "Process a refund"
+          }
+        },
+        {
+          "name": "Cancel Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/1/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "1", "cancel"]
+            },
+            "description": "Cancel a payment"
+          }
+        },
+        {
+          "name": "Get Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/1/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "1", "status"]
+            },
+            "description": "Get payment status"
+          }
+        },
+        {
+          "name": "Check if Order is Paid",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/order/1/paid",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "order", "1", "paid"]
+            },
+            "description": "Check if an order has been paid"
+          }
+        }
+      ]
     },
     {
       "name": "Loyalty Program",
