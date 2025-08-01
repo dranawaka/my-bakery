@@ -87,4 +87,12 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @return a list of categories ordered by sort order
      */
     List<Category> findAllByOrderBySortOrderAsc();
+    
+    /**
+     * Find a category by name.
+     *
+     * @param name the name to search for
+     * @return an Optional containing the category if found, or empty if not found
+     */
+    Optional<Category> findByName(String name);
 }

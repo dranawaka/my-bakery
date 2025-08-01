@@ -1,0 +1,86 @@
+@startuml Order Processing Flow
+
+actor Client
+participant "OrderController" as OC
+participant "OrderService" as OS
+participant "ProductRepository" as PR
+participant "UserRepository" as UR
+participant "OrderRepository" as OR
+participant "InventoryService" as IS
+
+== Create Order ==
+Client -> OC: POST /api/orders (Order)
+OC -> OS: createOrder(Order)
+OS -> OS: generateOrderNumber()
+OS -> UR: findById(customerId)
+UR --> OS: Optional<User>
+OS -> OS: processOrderItems(Order)
+OS -> PR: findById(productId)
+PR --> OS: Optional<Product>
+OS -> OS: calculateOrderTotals(Order)
+OS -> OS: updateInventoryForOrder(Order)
+OS -> IS: updateInventory(productId, quantity)
+IS --> OS: void
+OS -> OR: save(Order)
+OR --> OS: Order
+OS --> OC: Order
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Get Order ==
+Client -> OC: GET /api/orders/{id}
+OC -> OS: getOrderById(id)
+OS -> OR: findById(id)
+OR --> OS: Optional<Order>
+OS --> OC: Order
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Update Order Status ==
+Client -> OC: PUT /api/orders/{id}/status (OrderStatus)
+OC -> OS: updateOrderStatus(id, status)
+OS -> OR: findById(id)
+OR --> OS: Optional<Order>
+OS -> OS: isValidStatusTransition(currentStatus, newStatus)
+OS -> OR: save(Order)
+OR --> OS: Order
+OS --> OC: Order
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Cancel Order ==
+Client -> OC: PUT /api/orders/{id}/cancel
+OC -> OS: cancelOrder(id)
+OS -> OR: findById(id)
+OR --> OS: Optional<Order>
+OS -> OS: canCancelOrder(Order)
+OS -> OS: restoreInventoryForOrder(Order)
+OS -> IS: updateInventory(productId, quantity)
+IS --> OS: void
+OS -> OR: save(Order)
+OR --> OS: Order
+OS --> OC: Order
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Get Orders By Customer ==
+Client -> OC: GET /api/orders/customer/{customerId}
+OC -> OS: getOrdersByCustomerId(customerId)
+OS -> OR: findByCustomerId(customerId)
+OR --> OS: List<Order>
+OS --> OC: List<Order>
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Get Orders By Status ==
+Client -> OC: GET /api/orders/status/{status}
+OC -> OS: getOrdersByStatus(status)
+OS -> OR: findByStatus(status)
+OR --> OS: List<Order>
+OS --> OC: List<Order>
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Get Orders By Date Range ==
+Client -> OC: GET /api/orders/date-range?startDate={startDate}&endDate={endDate}
+OC -> OS: getOrdersByDateRange(startDate, endDate)
+OS -> OR: findByOrderDateBetween(startDate, endDate)
+OR --> OS: List<Order>
+OS --> OC: List<Order>
+OC --> Client: ResponseEntity<ApiResponse<?>>
+
+@enduml

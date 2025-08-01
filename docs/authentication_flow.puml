@@ -1,0 +1,65 @@
+@startuml Authentication Flow
+
+actor Client
+participant "AuthController" as AC
+participant "AuthService" as AS
+participant "JwtTokenProvider" as JTP
+participant "UserRepository" as UR
+participant "SecurityContext" as SC
+
+== Registration ==
+Client -> AC: POST /api/auth/register (RegisterRequest)
+AC -> AS: register(RegisterRequest)
+AS -> UR: findByEmail(email)
+UR --> AS: Optional<User>
+AS -> UR: save(User)
+UR --> AS: User
+AS --> AC: User
+AC --> Client: ResponseEntity<ApiResponse<?>>
+
+== Login ==
+Client -> AC: POST /api/auth/login (LoginRequest)
+AC -> AS: login(LoginRequest)
+AS -> UR: findByEmail(email)
+UR --> AS: Optional<User>
+AS -> AS: passwordEncoder.matches(password, user.getPassword())
+AS -> JTP: createToken(Authentication)
+JTP --> AS: JWT token
+AS -> JTP: createRefreshToken(username)
+JTP --> AS: Refresh token
+AS --> AC: AuthResponse(token, refreshToken)
+AC --> Client: ResponseEntity<AuthResponse>
+
+== Token Validation (for protected endpoints) ==
+Client -> JwtAuthenticationFilter: Request with Authorization header
+JwtAuthenticationFilter -> JwtAuthenticationFilter: resolveToken(request)
+JwtAuthenticationFilter -> JTP: validateToken(jwt)
+JTP --> JwtAuthenticationFilter: boolean (valid/invalid)
+JwtAuthenticationFilter -> JTP: getAuthentication(jwt)
+JTP --> JwtAuthenticationFilter: Authentication
+JwtAuthenticationFilter -> SC: setAuthentication(auth)
+JwtAuthenticationFilter --> Client: Continue request processing
+
+== Token Refresh ==
+Client -> AC: POST /api/auth/refresh (refreshToken)
+AC -> JTP: validateToken(refreshToken)
+JTP --> AC: boolean (valid/invalid)
+AC -> JTP: getUsername(refreshToken)
+JTP --> AC: username
+AC -> UR: findByEmail(username)
+UR --> AC: Optional<User>
+AC -> JTP: createToken(Authentication)
+JTP --> AC: JWT token
+AC -> JTP: createRefreshToken(username)
+JTP --> AC: Refresh token
+AC --> Client: ResponseEntity<AuthResponse>
+
+== Logout ==
+Client -> AC: POST /api/auth/logout (token)
+AC -> JTP: getUsername(token)
+JTP --> AC: username
+AC -> AS: logout(username)
+AS --> AC: void
+AC --> Client: ResponseEntity<ApiResponse<?>>
+
+@enduml

@@ -3,6 +3,10 @@ package com.aurelius.tech.mybakery.service;
 import com.aurelius.tech.mybakery.model.User;
 import com.aurelius.tech.mybakery.repository.UserRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,13 +19,23 @@ import java.util.Optional;
 @Service
 public class AuthService {
     
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    
+    @Value("${admin.username}")
+    private String adminUsername;
+    
+    @Value("${admin.password}")
+    private String adminPassword;
     
     /**
      * Constructor with dependencies.
      */
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     
     /**
@@ -36,7 +50,8 @@ public class AuthService {
             throw new RuntimeException("Email is already in use");
         }
         
-        // In a real implementation, we would encode the password here
+        // Encode the password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole(User.Role.CUSTOMER); // Default role for new users
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -53,15 +68,67 @@ public class AuthService {
      * @throws RuntimeException if authentication fails
      */
     public User login(String email, String password) {
+        // Check if this is the admin user from properties
+        if (email.equals(adminUsername)) {
+            logger.info("Admin login attempt with username: {}", email);
+            
+            // Create admin user if it doesn't exist in the database
+            Optional<User> adminUserOpt = userRepository.findByEmail(adminUsername);
+            User adminUser;
+            
+            if (adminUserOpt.isEmpty()) {
+                logger.info("Creating new admin user in database");
+                // Create a new admin user
+                adminUser = new User();
+                adminUser.setEmail(adminUsername);
+                adminUser.setPassword(passwordEncoder.encode(adminPassword)); // Encode the password
+                adminUser.setFirstName("Admin");
+                adminUser.setLastName("User");
+                adminUser.setRole(User.Role.ADMIN);
+                adminUser.setEmailVerified(true);
+                adminUser.setActive(true);
+                adminUser.setCreatedAt(LocalDateTime.now());
+                adminUser.setUpdatedAt(LocalDateTime.now());
+                adminUser = userRepository.save(adminUser);
+            } else {
+                adminUser = adminUserOpt.get();
+                // Check if admin password matches
+                if (!passwordEncoder.matches(adminPassword, adminUser.getPassword())) {
+                    logger.info("Updating admin password in database");
+                    // Update admin password if it has changed in properties
+                    adminUser.setPassword(passwordEncoder.encode(adminPassword));
+                    adminUser.setUpdatedAt(LocalDateTime.now());
+                    adminUser = userRepository.save(adminUser);
+                }
+            }
+            
+            // Verify the provided password
+            if (password.equals(adminPassword)) {
+                logger.info("Admin login successful");
+                return adminUser;
+            } else {
+                logger.warn("Admin login failed: incorrect password");
+                throw new RuntimeException("Invalid email or password. Please try again.");
+            }
+        }
+        
+        // Regular user authentication
+        logger.info("Regular user login attempt with email: {}", email);
+        
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
-            throw new RuntimeException("Invalid email or password");
+            logger.warn("Login failed: user not found with email: {}", email);
+            throw new RuntimeException("Invalid email or password. Please try again.");
         }
         
         User user = userOptional.get();
-        // In a real implementation, we would check the password here
-        // For now, we'll just assume the password is correct
+        // Check if password matches using passwordEncoder
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            logger.warn("Login failed: incorrect password for user: {}", email);
+            throw new RuntimeException("Invalid email or password. Please try again.");
+        }
         
+        logger.info("User login successful for: {}", email);
         return user;
     }
     
@@ -113,11 +180,13 @@ public class AuthService {
         }
         
         User user = userOptional.get();
-        // In a real implementation, we would check the old password here
-        // For now, we'll just assume the old password is correct
+        // Check if old password matches
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
         
-        // In a real implementation, we would encode the new password here
-        user.setPassword(newPassword);
+        // Encode the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdatedAt(LocalDateTime.now());
         
         return userRepository.save(user);
@@ -138,8 +207,8 @@ public class AuthService {
         }
         
         User user = userOptional.get();
-        // In a real implementation, we would encode the new password here
-        user.setPassword(newPassword);
+        // Encode the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdatedAt(LocalDateTime.now());
         
         return userRepository.save(user);
