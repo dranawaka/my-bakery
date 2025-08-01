@@ -1595,22 +1595,1382 @@
     {
       "name": "Loyalty Program",
       "description": "Endpoints for managing loyalty points, rewards, and tiers",
-      "item": []
+      "item": [
+        {
+          "name": "Get Customer Points",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/customers/1/points",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "customers", "1", "points"]
+            },
+            "description": "Get loyalty points for a customer"
+          }
+        },
+        {
+          "name": "Get Customer Tier",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/customers/1/tier",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "customers", "1", "tier"]
+            },
+            "description": "Get loyalty tier for a customer"
+          }
+        },
+        {
+          "name": "Get Next Tier",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/customers/1/next-tier",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "customers", "1", "next-tier"]
+            },
+            "description": "Get next loyalty tier for a customer"
+          }
+        },
+        {
+          "name": "Award Points for Purchase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/award-points",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "award-points"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"orderId\": 1,\n  \"amount\": 100.00,\n  \"pointsToAward\": 100\n}"
+            },
+            "description": "Award loyalty points for a purchase"
+          }
+        },
+        {
+          "name": "Award Bonus Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/award-bonus",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "award-bonus"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"points\": 50,\n  \"reason\": \"Birthday bonus\"\n}"
+            },
+            "description": "Award bonus loyalty points"
+          }
+        },
+        {
+          "name": "Redeem Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/redeem",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "redeem"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"rewardId\": 1,\n  \"points\": 100\n}"
+            },
+            "description": "Redeem loyalty points for a reward"
+          }
+        },
+        {
+          "name": "Get Points History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/customers/1/history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "customers", "1", "history"]
+            },
+            "description": "Get loyalty points history for a customer"
+          }
+        },
+        {
+          "name": "Get Points History by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/customers/1/history/date-range?startDate=2023-01-01T00:00:00&endDate=2023-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "customers", "1", "history", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2023-01-01T00:00:00"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2023-12-31T23:59:59"
+                }
+              ]
+            },
+            "description": "Get loyalty points history for a customer by date range"
+          }
+        },
+        {
+          "name": "Get Available Rewards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/customers/1/rewards",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "customers", "1", "rewards"]
+            },
+            "description": "Get available rewards for a customer"
+          }
+        },
+        {
+          "name": "Get All Rewards",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/rewards",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "rewards"]
+            },
+            "description": "Get all loyalty rewards"
+          }
+        },
+        {
+          "name": "Get All Tiers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/tiers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "tiers"]
+            },
+            "description": "Get all loyalty tiers"
+          }
+        },
+        {
+          "name": "Create Reward",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/rewards",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "rewards"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Free Cake\",\n  \"description\": \"Get a free cake with your next purchase\",\n  \"pointsCost\": 500,\n  \"active\": true,\n  \"expiryDays\": 30\n}"
+            },
+            "description": "Create a new loyalty reward"
+          }
+        },
+        {
+          "name": "Update Reward",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/rewards/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "rewards", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Free Premium Cake\",\n  \"description\": \"Get a free premium cake with your next purchase\",\n  \"pointsCost\": 600,\n  \"active\": true,\n  \"expiryDays\": 45\n}"
+            },
+            "description": "Update a loyalty reward"
+          }
+        },
+        {
+          "name": "Delete Reward",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/rewards/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "rewards", "1"]
+            },
+            "description": "Delete a loyalty reward"
+          }
+        },
+        {
+          "name": "Create Tier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/tiers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "tiers"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gold\",\n  \"description\": \"Gold tier with exclusive benefits\",\n  \"pointsThreshold\": 1000,\n  \"multiplier\": 1.5,\n  \"benefits\": [\"Free delivery\", \"Priority service\"]\n}"
+            },
+            "description": "Create a new loyalty tier"
+          }
+        },
+        {
+          "name": "Update Tier",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/tiers/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "tiers", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Platinum\",\n  \"description\": \"Platinum tier with exclusive benefits\",\n  \"pointsThreshold\": 2000,\n  \"multiplier\": 2.0,\n  \"benefits\": [\"Free delivery\", \"Priority service\", \"Exclusive discounts\"]\n}"
+            },
+            "description": "Update a loyalty tier"
+          }
+        },
+        {
+          "name": "Delete Tier",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/tiers/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "tiers", "1"]
+            },
+            "description": "Delete a loyalty tier"
+          }
+        },
+        {
+          "name": "Process Expired Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/loyalty/process-expired",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "loyalty", "process-expired"]
+            },
+            "description": "Process expired loyalty points"
+          }
+        }
+      ]
     },
     {
       "name": "Promotions & Discounts",
       "description": "Endpoints for managing promotions and discounts",
-      "item": []
+      "item": [
+        {
+          "name": "Get All Promotions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions"]
+            },
+            "description": "Get all promotions"
+          }
+        },
+        {
+          "name": "Get Promotion by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1"]
+            },
+            "description": "Get a promotion by ID"
+          }
+        },
+        {
+          "name": "Get Promotion by Promo Code",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/code/SUMMER2023",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "code", "SUMMER2023"]
+            },
+            "description": "Get a promotion by promo code"
+          }
+        },
+        {
+          "name": "Get Active Promotions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "active"]
+            },
+            "description": "Get active promotions"
+          }
+        },
+        {
+          "name": "Get Active Promotions by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/active/type/PERCENTAGE",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "active", "type", "PERCENTAGE"]
+            },
+            "description": "Get active promotions by discount type"
+          }
+        },
+        {
+          "name": "Get Active Promotions by Category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/active/category/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "active", "category", "1"]
+            },
+            "description": "Get active promotions by category"
+          }
+        },
+        {
+          "name": "Get Active Promotions by Product",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/active/product/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "active", "product", "1"]
+            },
+            "description": "Get active promotions by product"
+          }
+        },
+        {
+          "name": "Get Active and Valid Promotions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/active-valid",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "active-valid"]
+            },
+            "description": "Get active and valid promotions"
+          }
+        },
+        {
+          "name": "Get Promotions Expiring Soon",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/expiring-soon",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "expiring-soon"]
+            },
+            "description": "Get promotions expiring soon"
+          }
+        },
+        {
+          "name": "Create Promotion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer Sale\",\n  \"description\": \"20% off all cakes for summer\",\n  \"promoCode\": \"SUMMER2023\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 20.0,\n  \"startDate\": \"2023-06-01T00:00:00\",\n  \"endDate\": \"2023-08-31T23:59:59\",\n  \"active\": true,\n  \"minimumOrderValue\": 50.0,\n  \"maximumDiscountAmount\": 100.0,\n  \"usageLimit\": 1000,\n  \"perCustomerUsageLimit\": 1,\n  \"applicableProducts\": [1, 2, 3],\n  \"applicableCategories\": [1],\n  \"exclusions\": []\n}"
+            },
+            "description": "Create a new promotion"
+          }
+        },
+        {
+          "name": "Update Promotion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Extended Summer Sale\",\n  \"description\": \"25% off all cakes for summer\",\n  \"promoCode\": \"SUMMER2023EXT\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 25.0,\n  \"startDate\": \"2023-06-01T00:00:00\",\n  \"endDate\": \"2023-09-30T23:59:59\",\n  \"active\": true,\n  \"minimumOrderValue\": 50.0,\n  \"maximumDiscountAmount\": 100.0,\n  \"usageLimit\": 1000,\n  \"perCustomerUsageLimit\": 1,\n  \"applicableProducts\": [1, 2, 3, 4],\n  \"applicableCategories\": [1],\n  \"exclusions\": []\n}"
+            },
+            "description": "Update a promotion"
+          }
+        },
+        {
+          "name": "Delete Promotion",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1"]
+            },
+            "description": "Delete a promotion"
+          }
+        },
+        {
+          "name": "Activate Promotion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1", "activate"]
+            },
+            "description": "Activate a promotion"
+          }
+        },
+        {
+          "name": "Deactivate Promotion",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1/deactivate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1", "deactivate"]
+            },
+            "description": "Deactivate a promotion"
+          }
+        },
+        {
+          "name": "Validate Promotion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "validate"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promoCode\": \"SUMMER2023\",\n  \"customerId\": 1,\n  \"orderValue\": 75.0,\n  \"products\": [1, 2],\n  \"categories\": [1]\n}"
+            },
+            "description": "Validate a promotion"
+          }
+        },
+        {
+          "name": "Apply Promotion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/apply",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "apply"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promoCode\": \"SUMMER2023\",\n  \"customerId\": 1,\n  \"orderId\": 1,\n  \"orderValue\": 75.0,\n  \"products\": [1, 2],\n  \"categories\": [1]\n}"
+            },
+            "description": "Apply a promotion to an order"
+          }
+        },
+        {
+          "name": "Get All Promotion Usages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/usages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "usages"]
+            },
+            "description": "Get all promotion usages"
+          }
+        },
+        {
+          "name": "Get Promotion Usages by Promotion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1/usages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1", "usages"]
+            },
+            "description": "Get promotion usages by promotion ID"
+          }
+        },
+        {
+          "name": "Get Promotion Usages by Customer",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/usages/customer/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "usages", "customer", "1"]
+            },
+            "description": "Get promotion usages by customer ID"
+          }
+        },
+        {
+          "name": "Get Promotion Usages by Order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/usages/order/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "usages", "order", "1"]
+            },
+            "description": "Get promotion usages by order ID"
+          }
+        },
+        {
+          "name": "Get Promotion Usages by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/usages/date-range?startDate=2023-01-01T00:00:00&endDate=2023-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "usages", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2023-01-01T00:00:00"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2023-12-31T23:59:59"
+                }
+              ]
+            },
+            "description": "Get promotion usages by date range"
+          }
+        },
+        {
+          "name": "Count Promotion Usages by Customer",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/promotions/1/usages/customer/1/count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "promotions", "1", "usages", "customer", "1", "count"]
+            },
+            "description": "Count promotion usages by customer"
+          }
+        }
+      ]
     },
     {
       "name": "Reporting",
       "description": "Endpoints for generating and retrieving reports",
-      "item": []
+      "item": [
+        {
+          "name": "Get All Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports"]
+            },
+            "description": "Get all reports"
+          }
+        },
+        {
+          "name": "Get Report by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "1"]
+            },
+            "description": "Get a report by ID"
+          }
+        },
+        {
+          "name": "Get Reports by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/type/SALES",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "type", "SALES"]
+            },
+            "description": "Get reports by type"
+          }
+        },
+        {
+          "name": "Get Reports by Creator",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/creator/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "creator", "1"]
+            },
+            "description": "Get reports by creator"
+          }
+        },
+        {
+          "name": "Get Reports by Date Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/date-range?startDate=2023-01-01T00:00:00&endDate=2023-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "date-range"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2023-01-01T00:00:00"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2023-12-31T23:59:59"
+                }
+              ]
+            },
+            "description": "Get reports by date range"
+          }
+        },
+        {
+          "name": "Generate Sales Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/sales",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "sales"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"groupBy\": \"MONTH\",\n  \"includeProducts\": true,\n  \"includeCategories\": true,\n  \"format\": \"PDF\"\n}"
+            },
+            "description": "Generate a sales report"
+          }
+        },
+        {
+          "name": "Generate Inventory Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "inventory"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"includeLowStock\": true,\n  \"includeOutOfStock\": true,\n  \"includeExpiring\": true,\n  \"expiryDays\": 30,\n  \"format\": \"PDF\"\n}"
+            },
+            "description": "Generate an inventory report"
+          }
+        },
+        {
+          "name": "Generate Customer Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/customer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "customer"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"includeNewCustomers\": true,\n  \"includeTopSpenders\": true,\n  \"includeInactive\": false,\n  \"inactiveDays\": 90,\n  \"format\": \"PDF\"\n}"
+            },
+            "description": "Generate a customer report"
+          }
+        },
+        {
+          "name": "Generate Product Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/product",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "product"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"includeTopSelling\": true,\n  \"includeLowSelling\": true,\n  \"includeProfit\": true,\n  \"format\": \"PDF\"\n}"
+            },
+            "description": "Generate a product report"
+          }
+        },
+        {
+          "name": "Generate Financial Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/financial",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "financial"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"includeRevenue\": true,\n  \"includeCosts\": true,\n  \"includeProfit\": true,\n  \"includeTaxes\": true,\n  \"groupBy\": \"MONTH\",\n  \"format\": \"PDF\"\n}"
+            },
+            "description": "Generate a financial report"
+          }
+        },
+        {
+          "name": "Delete Report",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "1"]
+            },
+            "description": "Delete a report"
+          }
+        }
+      ]
     },
     {
       "name": "Analytics",
       "description": "Endpoints for generating and retrieving analytics",
-      "item": []
+      "item": [
+        {
+          "name": "Get All Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics"]
+            },
+            "description": "Get all analytics"
+          }
+        },
+        {
+          "name": "Get Analytics by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "1"]
+            },
+            "description": "Get analytics by ID"
+          }
+        },
+        {
+          "name": "Get Analytics by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/type/SALES_TREND",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "type", "SALES_TREND"]
+            },
+            "description": "Get analytics by type"
+          }
+        },
+        {
+          "name": "Get Analytics by Time Period",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/period/LAST_MONTH",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "period", "LAST_MONTH"]
+            },
+            "description": "Get analytics by time period"
+          }
+        },
+        {
+          "name": "Get Most Recent Analytics by Type",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/type/SALES_TREND/recent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "type", "SALES_TREND", "recent"]
+            },
+            "description": "Get most recent analytics by type"
+          }
+        },
+        {
+          "name": "Get Dashboard Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "dashboard"]
+            },
+            "description": "Get dashboard analytics"
+          }
+        },
+        {
+          "name": "Generate Sales Trend Analytics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/sales-trend",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "sales-trend"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"groupBy\": \"MONTH\",\n  \"compareWithPrevious\": true\n}"
+            },
+            "description": "Generate sales trend analytics"
+          }
+        },
+        {
+          "name": "Generate Inventory Level Analytics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/inventory-level",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "inventory-level"]
+            },
+            "description": "Generate inventory level analytics"
+          }
+        },
+        {
+          "name": "Generate Customer Behavior Analytics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/customer-behavior",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "customer-behavior"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"segmentBy\": \"PURCHASE_FREQUENCY\",\n  \"includeNewVsReturning\": true\n}"
+            },
+            "description": "Generate customer behavior analytics"
+          }
+        },
+        {
+          "name": "Generate Product Performance Analytics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/product-performance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "product-performance"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"topProducts\": 10,\n  \"includeCategories\": true\n}"
+            },
+            "description": "Generate product performance analytics"
+          }
+        },
+        {
+          "name": "Generate Financial Metrics Analytics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/financial-metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "financial-metrics"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"startDate\": \"2023-01-01T00:00:00\",\n  \"endDate\": \"2023-12-31T23:59:59\",\n  \"includeRevenue\": true,\n  \"includeCosts\": true,\n  \"includeProfit\": true,\n  \"groupBy\": \"MONTH\"\n}"
+            },
+            "description": "Generate financial metrics analytics"
+          }
+        },
+        {
+          "name": "Get Analytics Trends",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/trends?type=SALES_TREND&startDate=2023-01-01T00:00:00&endDate=2023-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "trends"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "SALES_TREND"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2023-01-01T00:00:00"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2023-12-31T23:59:59"
+                }
+              ]
+            },
+            "description": "Get analytics trends"
+          }
+        },
+        {
+          "name": "Delete Analytics",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "analytics", "1"]
+            },
+            "description": "Delete analytics"
+          }
+        }
+      ]
     }
   ],
   "variable": [

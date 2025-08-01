@@ -11,26 +11,31 @@ import com.aurelius.tech.mybakery.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Controller for handling authentication and authorization endpoints.
- * This is a simplified version without Spring Security or JWT dependencies.
  */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
     
     /**
      * Constructor with dependencies.
      */
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, JwtTokenProvider jwtTokenProvider) {
         this.authService = authService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
     
     /**
@@ -52,9 +57,16 @@ public class AuthController {
         
             User registeredUser = authService.register(user);
         
+            // Create authentication object
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                registeredUser.getEmail(),
+                registeredUser.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + registeredUser.getRole().name()))
+            );
+            
             // Generate JWT token
-            String token = "simulated-jwt-token"; // In a real implementation, we would generate a JWT token
-            String refreshToken = "simulated-refresh-token"; // In a real implementation, we would generate a refresh token
+            String token = jwtTokenProvider.createToken(authentication);
+            String refreshToken = jwtTokenProvider.createRefreshToken(registeredUser.getEmail());
         
             // Create AuthResponse
             AuthResponse authResponse = new AuthResponse(token, refreshToken, registeredUser);
@@ -69,7 +81,7 @@ public class AuthController {
      * Authenticate a user.
      *
      * @param loginRequest the login request containing email and password
-     * @return a response entity with the authenticated user
+     * @return a response entity with the authenticated user and JWT token
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
@@ -83,11 +95,21 @@ public class AuthController {
             
             User user = authService.login(email, password);
             
-            // In a real implementation, we would generate a JWT token here
-            // For now, we'll just return the user
+            // Create authentication object
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getEmail(),
+                password,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+            );
+            
+            // Generate JWT token
+            String token = jwtTokenProvider.createToken(authentication);
+            String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+            
             Map<String, Object> response = new HashMap<>();
             response.put("user", user);
-            response.put("token", "simulated-jwt-token");
+            response.put("token", token);
+            response.put("refreshToken", refreshToken);
             
             return createSuccessResponse("Login successful", response);
         } catch (Exception e) {
@@ -101,16 +123,25 @@ public class AuthController {
      * @return a response entity with the current user
      */
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         try {
-            // In a real implementation, we would extract the user from the JWT token
-            // For now, we'll just return a simulated user
-            User user = new User();
-            user.setId(1L);
-            user.setEmail("user@example.com");
-            user.setFirstName("John");
-            user.setLastName("Doe");
-            user.setRole(User.Role.CUSTOMER);
+            // Extract token from Authorization header
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return createErrorResponse("Invalid Authorization header", HttpStatus.UNAUTHORIZED);
+            }
+            
+            String token = authHeader.substring(7); // Remove "Bearer " prefix
+            
+            // Validate token
+            if (!jwtTokenProvider.validateToken(token)) {
+                return createErrorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+            }
+            
+            // Extract username from token
+            String username = jwtTokenProvider.getUsername(token);
+            
+            // Get user from database
+            User user = authService.getUserByEmail(username);
             
             return createSuccessResponse("User retrieved successfully", user);
         } catch (Exception e) {
@@ -133,11 +164,31 @@ public class AuthController {
                 return createErrorResponse("Refresh token is required", HttpStatus.BAD_REQUEST);
             }
             
-            // In a real implementation, we would validate the refresh token and generate a new JWT token
-            // For now, we'll just return a simulated token
+            // Validate the refresh token
+            if (!jwtTokenProvider.validateToken(refreshToken)) {
+                return createErrorResponse("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+            }
+            
+            // Extract username from the refresh token
+            String username = jwtTokenProvider.getUsername(refreshToken);
+            
+            // Get user from database
+            User user = authService.getUserByEmail(username);
+            
+            // Create authentication object
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                username,
+                "",
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+            );
+            
+            // Generate new tokens
+            String newToken = jwtTokenProvider.createToken(authentication);
+            String newRefreshToken = jwtTokenProvider.createRefreshToken(username);
+            
             Map<String, String> response = new HashMap<>();
-            response.put("token", "simulated-jwt-token");
-            response.put("refreshToken", "simulated-refresh-token");
+            response.put("token", newToken);
+            response.put("refreshToken", newRefreshToken);
             
             return createSuccessResponse("Token refreshed successfully", response);
         } catch (Exception e) {
@@ -151,10 +202,24 @@ public class AuthController {
      * @return a response entity with a success message
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
         try {
-            // In a real implementation, we would invalidate the JWT token
-            // For now, we'll just return a success message
+            // Extract token from Authorization header
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return createErrorResponse("Invalid Authorization header", HttpStatus.UNAUTHORIZED);
+            }
+            
+            String token = authHeader.substring(7); // Remove "Bearer " prefix
+            
+            // Validate token
+            if (!jwtTokenProvider.validateToken(token)) {
+                return createErrorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+            }
+            
+            // In a more complex implementation, we could add the token to a blacklist
+            // For now, we'll just return a success message as JWT tokens are stateless
+            // and typically handled on the client side
+            
             return createSuccessResponse("Logout successful", null);
         } catch (Exception e) {
             return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
