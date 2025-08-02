@@ -1,5 +1,6 @@
 package com.aurelius.tech.mybakery.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ public class RecipeIngredient {
     
     @ManyToOne
     @JoinColumn(name = "recipe_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Recipe recipe;
     
     @Column(nullable = false)

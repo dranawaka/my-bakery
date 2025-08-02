@@ -133,6 +133,22 @@ public class AnalyticsController {
     }
     
     /**
+     * Get dashboard summary data.
+     *
+     * @return a response entity with dashboard summary
+     */
+    @GetMapping("/dashboard-summary")
+    public ResponseEntity<ApiResponse<?>> getDashboardSummary() {
+        try {
+            Map<String, Object> summaryData = analyticsService.getDashboardSummary();
+            return ResponseEntity.ok(ApiResponse.success(summaryData, "Dashboard summary retrieved successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+    
+    /**
      * Generate sales trend analytics.
      *
      * @param requestBody the request body containing the analytics parameters

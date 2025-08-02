@@ -29,6 +29,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="cart">
+                                <i class="bi bi-cart3 me-2"></i>Cart
+                                <span class="badge bg-danger ms-2" id="cart-badge" style="display: none;">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="#" data-page="inventory">
                                 <i class="bi bi-clipboard-check me-2"></i>Inventory
                             </a>
@@ -72,6 +78,11 @@
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2" id="page-title">Dashboard</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-sm btn-outline-primary me-2" type="button" id="cart-preview-btn">
+                            <i class="bi bi-cart3 me-1"></i>
+                            Cart
+                            <span class="badge bg-danger ms-1" id="header-cart-badge" style="display: none;">0</span>
+                        </button>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>
@@ -213,6 +224,10 @@
                         <!-- Product content will be dynamically loaded by JavaScript -->
                     </div>
 
+                    <div id="cart-page" class="page-content">
+                        <!-- Cart content will be dynamically loaded by JavaScript -->
+                    </div>
+
                     <div id="inventory-page" class="page-content">
                         <h3>Inventory Management</h3>
                         <p>This section will be implemented with JavaScript.</p>
@@ -279,9 +294,70 @@
         </div>
     </div>
 
+    <!-- Cart Preview Modal -->
+    <div class="modal fade" id="cartPreviewModal" tabindex="-1" aria-labelledby="cartPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartPreviewModalLabel">Shopping Cart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cart-preview-content">
+                        <!-- Cart items will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+                    <button type="button" class="btn btn-outline-primary me-2" id="view-cart-btn">View Cart</button>
+                    <button type="button" class="btn btn-primary" id="proceed-to-checkout-btn">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Cart Modal -->
+    <div class="modal fade" id="addToCartModal" tabindex="-1" aria-labelledby="addToCartModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addToCartModalLabel">Add to Cart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img id="product-image" src="" alt="Product" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-8">
+                            <h6 id="product-name"></h6>
+                            <p class="text-muted" id="product-category"></p>
+                            <p class="fw-bold" id="product-price"></p>
+                            <div class="mb-3">
+                                <label for="quantity-input" class="form-label">Quantity</label>
+                                <div class="input-group">
+                                    <button type="button" class="btn btn-outline-secondary" id="decrease-quantity">-</button>
+                                    <input type="number" class="form-control text-center" id="quantity-input" value="1" min="1" max="99">
+                                    <button type="button" class="btn btn-outline-secondary" id="increase-quantity">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="add-to-cart-btn">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/orders.js"></script>
 </body>
 </html>

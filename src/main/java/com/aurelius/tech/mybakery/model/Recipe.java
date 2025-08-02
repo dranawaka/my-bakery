@@ -1,5 +1,6 @@
 package com.aurelius.tech.mybakery.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -66,6 +67,7 @@ public class Recipe {
     private LocalDateTime updatedAt;
     
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<RecipeIngredient> ingredients = new ArrayList<>();
     
     /**

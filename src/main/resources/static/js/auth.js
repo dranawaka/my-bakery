@@ -3,8 +3,7 @@
  * Handles user authentication, token management, and session control
  */
 
-// Base URL for API endpoints
-const API_BASE_URL = window.location.origin + '/api';
+// API_BASE_URL is defined in main.js
 
 // Token storage keys
 const TOKEN_KEY = 'bakery_auth_token';
@@ -29,6 +28,11 @@ function initAuth() {
                 const user = response.data || response;
                 setAuthenticatedUser(user);
                 hideLoginModal();
+                
+                // Initialize cart after authentication
+                if (typeof cartService !== 'undefined' && cartService.initAfterAuth) {
+                    cartService.initAfterAuth();
+                }
             })
             .catch(error => {
                 console.error('Token validation failed:', error);
@@ -53,6 +57,11 @@ function initAuth() {
                 setAuthenticatedUser(data.user);
                 storeTokens(data.token, data.refreshToken);
                 hideLoginModal();
+                
+                // Initialize cart after authentication
+                if (typeof cartService !== 'undefined' && cartService.initAfterAuth) {
+                    cartService.initAfterAuth();
+                }
                 
                 // Navigate to dashboard page
                 const dashboardLink = document.querySelector('.nav-link[data-page="dashboard"]');

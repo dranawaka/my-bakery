@@ -1,5 +1,6 @@
 package com.aurelius.tech.mybakery.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -69,7 +70,13 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String notes;
     
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_method", nullable = false)
+    private DeliveryMethod deliveryMethod = DeliveryMethod.DELIVERY;
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<OrderItem> items = new ArrayList<>();
     
     @Column(name = "created_at")
@@ -77,6 +84,9 @@ public class Order {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @Transient
+    private Long customerId;
     
     /**
      * Default constructor
@@ -97,6 +107,23 @@ public class Order {
         this.orderDate = orderDate;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.deliveryMethod = DeliveryMethod.DELIVERY; // Default to delivery
+    }
+    
+    /**
+     * Constructor with essential fields including delivery method
+     */
+    public Order(Long id, User customer, String orderNumber, OrderStatus status, 
+                BigDecimal totalAmount, LocalDateTime orderDate, DeliveryMethod deliveryMethod) {
+        this.id = id;
+        this.customer = customer;
+        this.orderNumber = orderNumber;
+        this.status = status;
+        this.totalAmount = totalAmount;
+        this.orderDate = orderDate;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.deliveryMethod = deliveryMethod;
     }
     
     // Getters and Setters
@@ -118,7 +145,16 @@ public class Order {
     }
     
     public Long getCustomerId() {
-        return customer != null ? customer.getId() : null;
+        if (customer != null) {
+            return customer.getId();
+        }
+        return customerId;
+    }
+    
+    public void setCustomerId(Long customerId) {
+        // This method is used by Jackson for deserialization
+        // The actual customer object will be set by the service layer
+        this.customerId = customerId;
     }
     
     public String getOrderNumber() {
@@ -273,6 +309,14 @@ public class Order {
         this.updatedAt = updatedAt;
     }
     
+    public DeliveryMethod getDeliveryMethod() {
+        return deliveryMethod;
+    }
+    
+    public void setDeliveryMethod(DeliveryMethod deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+    
     /**
      * Enum representing order status in the system.
      * PENDING → CONFIRMED → PREPARING → READY → COMPLETED
@@ -286,5 +330,13 @@ public class Order {
         COMPLETED,
         CANCELLED,
         REFUNDED
+    }
+
+    /**
+     * Enum representing delivery method for the order.
+     */
+    public enum DeliveryMethod {
+        PICKUP,
+        DELIVERY
     }
 }

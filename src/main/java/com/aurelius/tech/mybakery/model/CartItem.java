@@ -1,5 +1,6 @@
 package com.aurelius.tech.mybakery.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +20,7 @@ public class CartItem {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonBackReference
     private Cart cart;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -41,6 +43,9 @@ public class CartItem {
     
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    @Column(name = "saved_for_later", nullable = false)
+    private Boolean savedForLater = false;
     
     /**
      * Default constructor
@@ -134,6 +139,14 @@ public class CartItem {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public Boolean getSavedForLater() {
+        return savedForLater;
+    }
+    
+    public void setSavedForLater(Boolean savedForLater) {
+        this.savedForLater = savedForLater;
     }
     
     /**

@@ -178,6 +178,28 @@ public class CartController {
     }
     
     /**
+     * Save an item for later.
+     *
+     * @param itemId the item ID
+     * @return a response entity with the updated cart
+     */
+    @PutMapping("/items/{itemId}/save-for-later")
+    public ResponseEntity<ApiResponse<?>> saveItemForLater(@PathVariable Long itemId) {
+        try {
+            // In a real implementation, we would get the cart ID from the authenticated user or session
+            Long cartId = 1L; // Simulated cart ID
+            
+            // Save item for later
+            Cart cart = cartService.saveItemForLater(cartId, itemId);
+            
+            return ResponseEntity.ok(ApiResponse.success(cart, "Item saved for later successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+    
+    /**
      * Clear the cart.
      *
      * @return a response entity with the updated cart

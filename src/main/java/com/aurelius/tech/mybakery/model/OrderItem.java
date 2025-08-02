@@ -1,5 +1,6 @@
 package com.aurelius.tech.mybakery.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ public class OrderItem {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonBackReference
     private Order order;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,6 +41,12 @@ public class OrderItem {
     
     @Column(name = "special_instructions", columnDefinition = "TEXT")
     private String specialInstructions;
+    
+    @Transient
+    private Long productId;
+    
+    @Transient
+    private Long orderId;
     
     /**
      * Default constructor
@@ -78,12 +86,16 @@ public class OrderItem {
     }
     
     public Long getOrderId() {
-        return order != null ? order.getId() : null;
+        if (order != null) {
+            return order.getId();
+        }
+        return orderId;
     }
     
     public void setOrderId(Long orderId) {
         // This method is used by services to set the order ID before loading the actual order
         // The actual Order object should be set using setOrder() when available
+        this.orderId = orderId;
     }
     
     public Product getProduct() {
@@ -95,12 +107,16 @@ public class OrderItem {
     }
     
     public Long getProductId() {
-        return product != null ? product.getId() : null;
+        if (product != null) {
+            return product.getId();
+        }
+        return productId;
     }
     
     public void setProductId(Long productId) {
         // This method is used by services to set the product ID before loading the actual product
         // The actual Product object should be set using setProduct() when available
+        this.productId = productId;
     }
     
     public Integer getQuantity() {

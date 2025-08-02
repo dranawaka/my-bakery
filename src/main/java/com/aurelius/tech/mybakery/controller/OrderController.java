@@ -212,6 +212,21 @@ public class OrderController {
     }
     
     /**
+     * Get recent orders (last 10 orders).
+     *
+     * @return a response entity with the recent orders
+     */
+    @GetMapping("/recent")
+    public ResponseEntity<?> getRecentOrders() {
+        try {
+            List<Order> orders = orderService.getRecentOrders();
+            return createSuccessResponse("Recent orders retrieved successfully", orders);
+        } catch (Exception e) {
+            return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
      * Create a success response.
      *
      * @param message the success message

@@ -69,6 +69,11 @@ public class OrderService {
         order.setCreatedAt(now);
         order.setUpdatedAt(now);
         
+        // Set delivery method if not already set
+        if (order.getDeliveryMethod() == null) {
+            order.setDeliveryMethod(Order.DeliveryMethod.DELIVERY); // Default to delivery
+        }
+        
         // Process order items
         if (order.getItems() != null && !order.getItems().isEmpty()) {
             processOrderItems(order);
@@ -391,5 +396,18 @@ public class OrderService {
         return order.getStatus() != OrderStatus.COMPLETED && 
                order.getStatus() != OrderStatus.CANCELLED && 
                order.getStatus() != OrderStatus.REFUNDED;
+    }
+    
+    /**
+     * Get recent orders (last 10 orders).
+     *
+     * @return a list of recent orders
+     */
+    public List<Order> getRecentOrders() {
+        // Get all orders sorted by order date (descending) and limit to 10
+        return orderRepository.findAll().stream()
+                .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))
+                .limit(10)
+                .toList();
     }
 }

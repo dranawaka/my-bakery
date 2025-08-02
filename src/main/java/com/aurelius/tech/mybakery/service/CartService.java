@@ -226,6 +226,37 @@ public class CartService {
     }
     
     /**
+     * Save an item for later.
+     *
+     * @param cartId the cart ID
+     * @param itemId the item ID
+     * @return the updated cart
+     * @throws RuntimeException if the cart or item is not found
+     */
+    @Transactional
+    public Cart saveItemForLater(Long cartId, Long itemId) {
+        Cart cart = getCartById(cartId);
+        
+        CartItem item = cartItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+        
+        // Ensure item belongs to the specified cart
+        if (!item.getCart().getId().equals(cartId)) {
+            throw new RuntimeException("Cart item does not belong to the specified cart");
+        }
+        
+        // Toggle saved for later status
+        item.setSavedForLater(!item.getSavedForLater());
+        item.setUpdatedAt(LocalDateTime.now());
+        cartItemRepository.save(item);
+        
+        // Update cart
+        cart.recalculateTotalAmount();
+        cart.setUpdatedAt(LocalDateTime.now());
+        return cartRepository.save(cart);
+    }
+    
+    /**
      * Clear a cart.
      *
      * @param cartId the cart ID

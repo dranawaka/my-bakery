@@ -409,6 +409,66 @@ public class AnalyticsService {
         analyticsRepository.deleteById(id);
     }
     
+    /**
+     * Get dashboard summary data.
+     *
+     * @return a map containing dashboard summary data
+     */
+    public Map<String, Object> getDashboardSummary() {
+        Map<String, Object> summary = new HashMap<>();
+        
+        try {
+            // Get total orders
+            long totalOrders = orderRepository.count();
+            summary.put("totalOrders", totalOrders);
+            
+            // Get total revenue
+            BigDecimal totalRevenue = orderRepository.findAll().stream()
+                    .map(order -> order.getTotalAmount())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            summary.put("totalRevenue", totalRevenue);
+            
+            // Get low stock count (items with stock < 10)
+            long lowStockCount = inventoryRepository.findAll().stream()
+                    .filter(inventory -> inventory.getQuantity() < 10)
+                    .count();
+            summary.put("lowStockCount", lowStockCount);
+            
+            // Get pending orders count
+            long pendingOrdersCount = orderRepository.findAll().stream()
+                    .filter(order -> "PENDING".equals(order.getStatus().toString()))
+                    .count();
+            summary.put("pendingOrdersCount", pendingOrdersCount);
+            
+            // Mock sales data for chart
+            Map<String, Object> salesData = new HashMap<>();
+            salesData.put("labels", List.of("Jan", "Feb", "Mar", "Apr", "May", "Jun"));
+            salesData.put("data", List.of(12000, 19000, 15000, 25000, 22000, 30000));
+            summary.put("salesData", salesData);
+            
+            // Mock top products data
+            List<Map<String, Object>> topProducts = List.of(
+                Map.of("name", "Chocolate Cake", "sales", 150),
+                Map.of("name", "Vanilla Cupcake", "sales", 120),
+                Map.of("name", "Bread Loaf", "sales", 100),
+                Map.of("name", "Croissant", "sales", 80),
+                Map.of("name", "Muffin", "sales", 60)
+            );
+            summary.put("topProducts", topProducts);
+            
+        } catch (Exception e) {
+            // Return default values if there's an error
+            summary.put("totalOrders", 0);
+            summary.put("totalRevenue", BigDecimal.ZERO);
+            summary.put("lowStockCount", 0);
+            summary.put("pendingOrdersCount", 0);
+            summary.put("salesData", Map.of("labels", List.of(), "data", List.of()));
+            summary.put("topProducts", List.of());
+        }
+        
+        return summary;
+    }
+    
     // Helper methods
     
     private String formatDate(LocalDateTime dateTime) {

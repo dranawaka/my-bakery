@@ -3,6 +3,9 @@
  * Handles UI interactions, page navigation, and data loading
  */
 
+// API base URL
+const API_BASE_URL = window.location.origin + '/api';
+
 // API service for making authenticated requests
 const apiService = {
     /**
@@ -150,6 +153,9 @@ function loadPageData(pageId) {
         case 'products':
             loadProductsData();
             break;
+        case 'cart':
+            loadCartData();
+            break;
         case 'inventory':
             loadInventoryData();
             break;
@@ -196,7 +202,11 @@ function loadDashboardData() {
         })
         .catch(error => {
             console.error('Failed to load dashboard summary:', error);
-            showErrorMessage('Failed to load dashboard data. Please try again later.');
+            // Set default values instead of showing error
+            document.getElementById('total-orders').textContent = '0';
+            document.getElementById('total-revenue').textContent = '$0';
+            document.getElementById('low-stock').textContent = '0';
+            document.getElementById('pending-orders').textContent = '0';
         });
     
     // Load recent orders
@@ -456,17 +466,19 @@ function fetchProducts() {
     apiService.get('/products')
         .then(response => {
             if (response.success) {
+                // Store products globally for cart functionality
+                window.currentProducts = response.data;
                 displayProducts(response.data);
             } else {
                 showErrorMessage('Failed to load products: ' + response.error.message);
                 document.getElementById('products-table').innerHTML = 
-                    '<tr><td colspan="6" class="text-center text-danger">Failed to load products</td></tr>';
+                    '<tr><td colspan="7" class="text-center text-danger">Failed to load products</td></tr>';
             }
         })
         .catch(error => {
             console.error('Error fetching products:', error);
             document.getElementById('products-table').innerHTML = 
-                '<tr><td colspan="6" class="text-center text-danger">Failed to load products</td></tr>';
+                '<tr><td colspan="7" class="text-center text-danger">Failed to load products</td></tr>';
         });
 }
 
@@ -502,6 +514,12 @@ function displayProducts(products) {
                     <button type="button" class="btn btn-outline-primary view-product-btn" data-product-id="${product.id}">
                         <i class="bi bi-eye"></i>
                     </button>
+                    <button type="button" class="btn btn-outline-success add-to-cart-btn" data-product-id="${product.id}" title="Add to Cart">
+                        <i class="bi bi-cart-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-info quick-add-btn" data-product-id="${product.id}" title="Quick Add (1)">
+                        <i class="bi bi-plus"></i>
+                    </button>
                     <button type="button" class="btn btn-outline-secondary edit-product-btn" data-product-id="${product.id}">
                         <i class="bi bi-pencil"></i>
                     </button>
@@ -520,6 +538,20 @@ function displayProducts(products) {
         button.addEventListener('click', function() {
             const productId = this.getAttribute('data-product-id');
             viewProduct(productId);
+        });
+    });
+    
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            addProductToCart(productId);
+        });
+    });
+    
+    document.querySelectorAll('.quick-add-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            quickAddToCart(productId);
         });
     });
     
@@ -1127,8 +1159,46 @@ function loadInventoryData() {
 }
 
 function loadOrdersData() {
-    // Implementation will be added later
     console.log('Loading orders data...');
+    if (typeof orderService !== 'undefined') {
+        orderService.loadOrdersPage();
+    } else {
+        console.error('Order service not available');
+        // Show a fallback message
+        const ordersPage = document.getElementById('orders-page');
+        if (ordersPage) {
+            ordersPage.innerHTML = `
+                <div class="alert alert-warning">
+                    <h4>Service Unavailable</h4>
+                    <p>The order service is not available. Please refresh the page and try again.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Order management functions are now handled by orderService in orders.js
+
+// Get status badge class
+function getStatusBadgeClass(status) {
+    switch (status) {
+        case 'PENDING':
+            return 'warning';
+        case 'PROCESSING':
+            return 'info';
+        case 'SHIPPED':
+            return 'primary';
+        case 'DELIVERED':
+            return 'success';
+        case 'COMPLETED':
+            return 'success';
+        case 'CANCELLED':
+            return 'danger';
+        case 'REFUNDED':
+            return 'secondary';
+        default:
+            return 'secondary';
+    }
 }
 
 function loadCustomersData() {
@@ -1205,6 +1275,298 @@ function loadReportsData() {
 function loadPromotionsData() {
     // Implementation will be added later
     console.log('Loading promotions data...');
+}
+
+// Load cart page data
+function loadCartData() {
+    console.log('Loading cart data...');
+    
+    // Update cart page content
+    const cartPage = document.getElementById('cart-page');
+    cartPage.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Shopping Cart</h3>
+            <div>
+                <button id="clear-cart-btn" class="btn btn-outline-danger me-2">
+                    <i class="bi bi-trash me-2"></i>Clear Cart
+                </button>
+                <button id="checkout-btn" class="btn btn-primary">
+                    <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <div id="cart-content">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading cart...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add event listeners
+    document.getElementById('clear-cart-btn')?.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear your cart?')) {
+            if (typeof cartService !== 'undefined') {
+                cartService.clearCart();
+            } else {
+                console.error('Cart service not available');
+            }
+        }
+    });
+    
+    document.getElementById('checkout-btn')?.addEventListener('click', () => {
+        if (typeof cartService !== 'undefined') {
+            cartService.proceedToCheckout();
+        } else {
+            console.error('Cart service not available');
+        }
+    });
+    
+    // Load cart data
+    loadCartContent();
+}
+
+// Load cart content
+async function loadCartContent() {
+    const cartContent = document.getElementById('cart-content');
+    if (!cartContent) return;
+    
+    try {
+        if (typeof cartService !== 'undefined') {
+            await cartService.loadCart();
+            displayCartContent();
+        } else {
+            cartContent.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+                    <h5 class="mt-3">Service Unavailable</h5>
+                    <p class="text-muted">Cart service is not available. Please refresh the page and try again.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading cart content:', error);
+        cartContent.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
+                <h5 class="mt-3">Error loading cart</h5>
+                <p class="text-muted">Please try again later.</p>
+            </div>
+        `;
+    }
+}
+
+// Display cart content
+function displayCartContent() {
+    const cartContent = document.getElementById('cart-content');
+    if (!cartContent) return;
+    
+    if (typeof cartService === 'undefined' || !cartService.cart || !cartService.cart.items || cartService.cart.items.length === 0) {
+        cartContent.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-cart3 fs-1 text-muted"></i>
+                <h5 class="mt-3">Your cart is empty</h5>
+                <p class="text-muted">Add some products to get started!</p>
+                <a href="#" class="btn btn-primary" onclick="loadPageData('products')">
+                    <i class="bi bi-box me-2"></i>Browse Products
+                </a>
+            </div>
+        `;
+        return;
+    }
+    
+    let activeItemsHtml = '';
+    let savedItemsHtml = '';
+    
+    cartService.cart.items.forEach(item => {
+        const itemCard = `
+            <div class="card mb-3 ${item.savedForLater ? 'border-warning' : ''}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <img src="${item.product.imageUrl || 'https://via.placeholder.com/100x100?text=Product'}" 
+                                 alt="${item.product.name}" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="mb-1">${item.product.name}</h6>
+                            <small class="text-muted">${item.product.category?.name || 'No Category'}</small>
+                            <br>
+                            <small class="text-muted">Unit Price: ${formatCurrency(item.unitPrice)}</small>
+                            ${item.savedForLater ? '<br><span class="badge bg-warning text-dark">Saved for Later</span>' : ''}
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        onclick="updateCartItemQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                                <input type="number" class="form-control text-center" value="${item.quantity}" 
+                                       min="1" max="99" onchange="updateCartItemQuantity(${item.id}, this.value)">
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        onclick="updateCartItemQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <span class="fw-bold">${formatCurrency(item.totalPrice)}</span>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button class="btn ${item.savedForLater ? 'btn-warning' : 'btn-outline-warning'}" 
+                                        onclick="saveForLater(${item.id})" 
+                                        title="${item.savedForLater ? 'Move to Cart' : 'Save for Later'}">
+                                    <i class="bi ${item.savedForLater ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>
+                                </button>
+                                <button class="btn btn-outline-danger" 
+                                        onclick="removeCartItem(${item.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (item.savedForLater) {
+            savedItemsHtml += itemCard;
+        } else {
+            activeItemsHtml += itemCard;
+        }
+    });
+    
+    const activeItems = cartService.cart.items.filter(item => !item.savedForLater);
+    const savedItems = cartService.cart.items.filter(item => item.savedForLater);
+    
+    let itemsHtml = '';
+    
+    if (activeItems.length > 0) {
+        itemsHtml += `
+            <h5 class="mb-3">Active Items (${activeItems.length})</h5>
+            ${activeItemsHtml}
+        `;
+    }
+    
+    if (savedItems.length > 0) {
+        itemsHtml += `
+            <h5 class="mb-3 mt-4">Saved for Later (${savedItems.length})</h5>
+            ${savedItemsHtml}
+        `;
+    }
+    
+    cartContent.innerHTML = `
+        <div class="mb-3">
+            ${itemsHtml}
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Total (Active Items)</h5>
+                    <h5 class="mb-0 text-primary">${formatCurrency(activeItems.reduce((sum, item) => sum + item.totalPrice, 0))}</h5>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Update cart item quantity
+async function updateCartItemQuantity(itemId, quantity) {
+    if (typeof cartService !== 'undefined') {
+        await cartService.updateCartItemQuantity(itemId, parseInt(quantity));
+        displayCartContent();
+    } else {
+        console.error('Cart service not available');
+    }
+}
+
+// Remove cart item
+async function removeCartItem(itemId) {
+    if (confirm('Are you sure you want to remove this item from your cart?')) {
+        if (typeof cartService !== 'undefined') {
+            await cartService.removeCartItem(itemId);
+            displayCartContent();
+        } else {
+            console.error('Cart service not available');
+        }
+    }
+}
+
+// Save item for later
+async function saveForLater(itemId) {
+    try {
+        if (typeof cartService !== 'undefined') {
+            const success = await cartService.saveForLater(itemId);
+            if (success) {
+                displayCartContent();
+            }
+        } else {
+            console.error('Cart service not available');
+        }
+    } catch (error) {
+        console.error('Error saving item for later:', error);
+        alert('Error saving item for later');
+    }
+}
+
+// Add product to cart
+async function addProductToCart(productId) {
+    try {
+        if (typeof cartService === 'undefined') {
+            console.error('Cart service not available');
+            return;
+        }
+        
+        // Find the product in the current products list
+        const product = window.currentProducts?.find(p => p.id == productId);
+        if (product) {
+            cartService.showAddToCartModal(product);
+        } else {
+            // If product not found in current list, fetch it
+            const response = await apiService.get(`/products/${productId}`);
+            if (response.success) {
+                cartService.showAddToCartModal(response.data);
+            } else {
+                alert('Product not found');
+            }
+        }
+    } catch (error) {
+        console.error('Error adding product to cart:', error);
+        alert('Error adding product to cart');
+    }
+}
+
+// Quick add product to cart (adds 1 quantity directly)
+async function quickAddToCart(productId) {
+    try {
+        if (typeof cartService === 'undefined') {
+            console.error('Cart service not available');
+            return;
+        }
+        
+        const success = await cartService.addItemToCart(productId, 1);
+        if (success) {
+            // Show a brief success message
+            const button = document.querySelector(`[data-product-id="${productId}"].quick-add-btn`);
+            if (button) {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i>';
+                button.classList.remove('btn-outline-info');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-info');
+                }, 1000);
+            }
+        }
+    } catch (error) {
+        console.error('Error quick adding product to cart:', error);
+        alert('Error adding product to cart');
+    }
 }
 
 function loadUsersData() {
@@ -2479,15 +2841,21 @@ function formatDate(dateString) {
 }
 
 function getStatusBadgeClass(status) {
-    switch (status.toLowerCase()) {
-        case 'pending':
-            return 'pending';
-        case 'processing':
-            return 'processing';
-        case 'completed':
-            return 'completed';
-        case 'cancelled':
-            return 'cancelled';
+    switch (status) {
+        case 'PENDING':
+            return 'warning';
+        case 'PROCESSING':
+            return 'info';
+        case 'SHIPPED':
+            return 'primary';
+        case 'DELIVERED':
+            return 'success';
+        case 'COMPLETED':
+            return 'success';
+        case 'CANCELLED':
+            return 'danger';
+        case 'REFUNDED':
+            return 'secondary';
         default:
             return 'secondary';
     }
