@@ -190,15 +190,16 @@ function loadDashboardData() {
     
     // Load dashboard summary data
     apiService.get('/analytics/dashboard-summary')
-        .then(data => {
+        .then(response => {
+            const data = response.data || response; // Handle both ApiResponse and direct data
             document.getElementById('total-orders').textContent = data.totalOrders || 0;
             document.getElementById('total-revenue').textContent = formatCurrency(data.totalRevenue || 0);
             document.getElementById('low-stock').textContent = data.lowStockCount || 0;
             document.getElementById('pending-orders').textContent = data.pendingOrdersCount || 0;
             
             // Load charts
-            loadSalesChart(data.salesData);
-            loadProductsChart(data.topProducts);
+            loadSalesChart(data.salesData || []);
+            loadProductsChart(data.topProducts || []);
         })
         .catch(error => {
             console.error('Failed to load dashboard summary:', error);
@@ -211,11 +212,12 @@ function loadDashboardData() {
     
     // Load recent orders
     apiService.get('/orders/recent')
-        .then(orders => {
+        .then(response => {
+            const orders = response.data || response; // Handle both ApiResponse and direct data
             const tableBody = document.getElementById('recent-orders-table');
             tableBody.innerHTML = '';
             
-            if (orders.length === 0) {
+            if (!orders || orders.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No recent orders</td>';
                 tableBody.appendChild(row);
@@ -225,11 +227,11 @@ function loadDashboardData() {
             orders.forEach(order => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${order.orderNumber}</td>
-                    <td>${order.customerName}</td>
-                    <td>${formatDate(order.orderDate)}</td>
-                    <td><span class="badge badge-${getStatusBadgeClass(order.status)}">${order.status}</span></td>
-                    <td>${formatCurrency(order.total)}</td>
+                    <td>${order.orderNumber || ''}</td>
+                    <td>${order.customerName || 'Unknown'}</td>
+                    <td>${formatDate(order.orderDate || '')}</td>
+                    <td><span class="badge badge-${getStatusBadgeClass(order.status || '')}">${order.status || ''}</span></td>
+                    <td>${formatCurrency(order.total || 0)}</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -242,11 +244,12 @@ function loadDashboardData() {
     
     // Load low stock items
     apiService.get('/inventory/low-stock')
-        .then(items => {
+        .then(response => {
+            const items = response.data || response; // Handle both ApiResponse and direct data
             const tableBody = document.getElementById('low-stock-table');
             tableBody.innerHTML = '';
             
-            if (items.length === 0) {
+            if (!items || items.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No low stock items</td>';
                 tableBody.appendChild(row);
@@ -256,11 +259,11 @@ function loadDashboardData() {
             items.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${item.productName}</td>
-                    <td>${item.category}</td>
-                    <td class="low-stock">${item.currentStock}</td>
-                    <td>${item.minStock}</td>
-                    <td><button class="btn btn-sm btn-outline-primary restock-btn" data-product-id="${item.productId}">Restock</button></td>
+                    <td>${item.productName || ''}</td>
+                    <td>${item.category || 'Uncategorized'}</td>
+                    <td class="low-stock">${item.currentStock || 0}</td>
+                    <td>${item.minStock || 0}</td>
+                    <td><button class="btn btn-sm btn-outline-primary restock-btn" data-product-id="${item.productId || ''}">Restock</button></td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -289,14 +292,20 @@ function loadSalesChart(salesData) {
         window.salesChart.destroy();
     }
     
+    // Ensure salesData is an array and has the expected format
+    if (!Array.isArray(salesData) || salesData.length === 0) {
+        console.warn('No sales data available for chart');
+        return;
+    }
+    
     // Create new chart
     window.salesChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: salesData.map(item => item.date),
+            labels: salesData.map(item => item.date || ''),
             datasets: [{
                 label: 'Sales',
-                data: salesData.map(item => item.amount),
+                data: salesData.map(item => item.amount || 0),
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 2,
@@ -341,13 +350,19 @@ function loadProductsChart(topProducts) {
         window.productsChart.destroy();
     }
     
+    // Ensure topProducts is an array and has the expected format
+    if (!Array.isArray(topProducts) || topProducts.length === 0) {
+        console.warn('No top products data available for chart');
+        return;
+    }
+    
     // Create new chart
     window.productsChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: topProducts.map(product => product.name),
+            labels: topProducts.map(product => product.name || ''),
             datasets: [{
-                data: topProducts.map(product => product.quantity),
+                data: topProducts.map(product => product.quantity || 0),
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.7)',
                     'rgba(54, 162, 235, 0.7)',

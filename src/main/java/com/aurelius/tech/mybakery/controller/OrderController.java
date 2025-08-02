@@ -220,7 +220,22 @@ public class OrderController {
     public ResponseEntity<?> getRecentOrders() {
         try {
             List<Order> orders = orderService.getRecentOrders();
-            return createSuccessResponse("Recent orders retrieved successfully", orders);
+            
+            // Transform order data to match frontend expectations
+            List<Map<String, Object>> transformedData = orders.stream()
+                .map(order -> {
+                    Map<String, Object> orderData = new HashMap<>();
+                    orderData.put("orderNumber", order.getOrderNumber());
+                    orderData.put("customerName", order.getCustomer() != null ? 
+                        order.getCustomer().getFirstName() + " " + order.getCustomer().getLastName() : "Unknown Customer");
+                    orderData.put("orderDate", order.getOrderDate().toString());
+                    orderData.put("status", order.getStatus().toString());
+                    orderData.put("total", order.getTotalAmount());
+                    return orderData;
+                })
+                .collect(java.util.stream.Collectors.toList());
+            
+            return createSuccessResponse("Recent orders retrieved successfully", transformedData);
         } catch (Exception e) {
             return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

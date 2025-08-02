@@ -207,7 +207,22 @@ public class InventoryController {
     public ResponseEntity<?> getLowStockInventory() {
         try {
             List<Inventory> inventoryList = inventoryService.getLowStockInventory();
-            return createSuccessResponse("Low stock inventory records retrieved successfully", inventoryList);
+            
+            // Transform inventory data to match frontend expectations
+            List<Map<String, Object>> transformedData = inventoryList.stream()
+                .map(inventory -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("productId", inventory.getProduct().getId());
+                    item.put("productName", inventory.getProduct().getName());
+                    item.put("category", inventory.getProduct().getCategory() != null ? 
+                        inventory.getProduct().getCategory().getName() : "Uncategorized");
+                    item.put("currentStock", inventory.getQuantity());
+                    item.put("minStock", inventory.getReorderPoint());
+                    return item;
+                })
+                .collect(java.util.stream.Collectors.toList());
+            
+            return createSuccessResponse("Low stock inventory records retrieved successfully", transformedData);
         } catch (Exception e) {
             return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

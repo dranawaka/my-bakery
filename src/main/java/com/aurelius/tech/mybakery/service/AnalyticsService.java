@@ -440,19 +440,24 @@ public class AnalyticsService {
                     .count();
             summary.put("pendingOrdersCount", pendingOrdersCount);
             
-            // Mock sales data for chart
-            Map<String, Object> salesData = new HashMap<>();
-            salesData.put("labels", List.of("Jan", "Feb", "Mar", "Apr", "May", "Jun"));
-            salesData.put("data", List.of(12000, 19000, 15000, 25000, 22000, 30000));
+            // Sales data for chart - frontend expects array of objects with date and amount
+            List<Map<String, Object>> salesData = List.of(
+                Map.of("date", "Jan", "amount", 12000),
+                Map.of("date", "Feb", "amount", 19000),
+                Map.of("date", "Mar", "amount", 15000),
+                Map.of("date", "Apr", "amount", 25000),
+                Map.of("date", "May", "amount", 22000),
+                Map.of("date", "Jun", "amount", 30000)
+            );
             summary.put("salesData", salesData);
             
-            // Mock top products data
+            // Top products data - frontend expects array of objects with name and quantity
             List<Map<String, Object>> topProducts = List.of(
-                Map.of("name", "Chocolate Cake", "sales", 150),
-                Map.of("name", "Vanilla Cupcake", "sales", 120),
-                Map.of("name", "Bread Loaf", "sales", 100),
-                Map.of("name", "Croissant", "sales", 80),
-                Map.of("name", "Muffin", "sales", 60)
+                Map.of("name", "Chocolate Cake", "quantity", 150),
+                Map.of("name", "Vanilla Cupcake", "quantity", 120),
+                Map.of("name", "Bread Loaf", "quantity", 100),
+                Map.of("name", "Croissant", "quantity", 80),
+                Map.of("name", "Muffin", "quantity", 60)
             );
             summary.put("topProducts", topProducts);
             
@@ -462,7 +467,7 @@ public class AnalyticsService {
             summary.put("totalRevenue", BigDecimal.ZERO);
             summary.put("lowStockCount", 0);
             summary.put("pendingOrdersCount", 0);
-            summary.put("salesData", Map.of("labels", List.of(), "data", List.of()));
+            summary.put("salesData", List.of());
             summary.put("topProducts", List.of());
         }
         
