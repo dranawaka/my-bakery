@@ -10,7 +10,8 @@ My Bakery Management System is designed to help bakery owners and staff efficien
 
 - **User Authentication**: Secure login and registration with role-based access control
 - **Dashboard**: Overview of key metrics and performance indicators
-- **Product Management**: Create, update, and manage bakery products
+- **Product Management**: Create, update, and manage bakery products with image uploads
+- **Image Management**: Cloudinary integration for product image storage and optimization
 - **Inventory Management**: Track ingredients and supplies with low stock alerts
 - **Order Processing**: Create and manage customer orders
 - **Customer Management**: Store and manage customer information
@@ -64,6 +65,7 @@ My Bakery Management System is designed to help bakery owners and staff efficien
 
 - [User Guide](docs/user-guide.md): Detailed instructions for using the system
 - [API Documentation](docs/api-documentation-fixed.md): Information about the RESTful API endpoints
+- [Cloudinary Setup Guide](CLOUDINARY_SETUP.md): Instructions for configuring image uploads
 
 ## Development
 

@@ -87,9 +87,14 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody Product product) {
         try {
+            System.out.println("Updating product with ID: " + id);
+            System.out.println("Product data: " + product.toString());
+            
             Product updatedProduct = productService.updateProduct(id, product);
             return createSuccessResponse("Product updated successfully", updatedProduct);
         } catch (Exception e) {
+            System.err.println("Error updating product: " + e.getMessage());
+            e.printStackTrace();
             return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

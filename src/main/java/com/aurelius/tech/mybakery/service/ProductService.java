@@ -43,6 +43,11 @@ public class ProductService {
             }
         }
     
+        // Set default values
+        if (product.getStockQuantity() == null) {
+            product.setStockQuantity(0);
+        }
+        
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
     
@@ -153,89 +158,108 @@ public class ProductService {
      * @throws RuntimeException if the product is not found
      */
     public Product updateProduct(Long id, Product updatedProduct) {
-        Optional<Product> productOptional = productRepository.findById(id);
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Product not found");
+        try {
+            Optional<Product> productOptional = productRepository.findById(id);
+            if (productOptional.isEmpty()) {
+                throw new RuntimeException("Product not found with ID: " + id);
+            }
+            
+            Product existingProduct = productOptional.get();
+            
+            // Update fields
+            if (updatedProduct.getName() != null) {
+                existingProduct.setName(updatedProduct.getName());
+            }
+            
+            if (updatedProduct.getDescription() != null) {
+                existingProduct.setDescription(updatedProduct.getDescription());
+            }
+            
+            if (updatedProduct.getShortDescription() != null) {
+                existingProduct.setShortDescription(updatedProduct.getShortDescription());
+            }
+            
+            // Handle category update - check for both category object and categoryId
+            if (updatedProduct.getCategory() != null && updatedProduct.getCategory().getId() != null) {
+                // Update category reference
+                Optional<Category> categoryOptional = categoryRepository.findById(updatedProduct.getCategory().getId());
+                if (categoryOptional.isPresent()) {
+                    existingProduct.setCategory(categoryOptional.get());
+                } else {
+                    throw new RuntimeException("Category not found with ID: " + updatedProduct.getCategory().getId());
+                }
+            }
+            
+            if (updatedProduct.getPrice() != null) {
+                existingProduct.setPrice(updatedProduct.getPrice());
+            }
+            
+            if (updatedProduct.getCostPrice() != null) {
+                existingProduct.setCostPrice(updatedProduct.getCostPrice());
+            }
+            
+            if (updatedProduct.getOriginalPrice() != null) {
+                existingProduct.setOriginalPrice(updatedProduct.getOriginalPrice());
+            }
+            
+            if (updatedProduct.getDiscount() != null) {
+                existingProduct.setDiscount(updatedProduct.getDiscount());
+            }
+            
+            if (updatedProduct.getSku() != null) {
+                existingProduct.setSku(updatedProduct.getSku());
+            }
+            
+            if (updatedProduct.getBarcode() != null) {
+                existingProduct.setBarcode(updatedProduct.getBarcode());
+            }
+            
+            if (updatedProduct.getImageUrl() != null) {
+                existingProduct.setImageUrl(updatedProduct.getImageUrl());
+            }
+            
+            if (updatedProduct.getImages() != null && !updatedProduct.getImages().isEmpty()) {
+                existingProduct.setImages(updatedProduct.getImages());
+            }
+            
+            if (updatedProduct.getNutritionalInfo() != null) {
+                existingProduct.setNutritionalInfo(updatedProduct.getNutritionalInfo());
+            }
+            
+            if (updatedProduct.getAllergens() != null) {
+                existingProduct.setAllergens(updatedProduct.getAllergens());
+            }
+            
+            if (updatedProduct.getIngredients() != null) {
+                existingProduct.setIngredients(updatedProduct.getIngredients());
+            }
+            
+            if (updatedProduct.getPreparationTime() != null) {
+                existingProduct.setPreparationTime(updatedProduct.getPreparationTime());
+            }
+            
+            if (updatedProduct.getShelfLife() != null) {
+                existingProduct.setShelfLife(updatedProduct.getShelfLife());
+            }
+            
+            if (updatedProduct.getStorageRequirements() != null) {
+                existingProduct.setStorageRequirements(updatedProduct.getStorageRequirements());
+            }
+            
+            if (updatedProduct.getStockQuantity() != null) {
+                existingProduct.setStockQuantity(updatedProduct.getStockQuantity());
+            }
+            
+            existingProduct.setActive(updatedProduct.isActive());
+            existingProduct.setFeatured(updatedProduct.isFeatured());
+            existingProduct.setUpdatedAt(LocalDateTime.now());
+            
+            return productRepository.save(existingProduct);
+        } catch (Exception e) {
+            System.err.println("Error updating product with ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to update product: " + e.getMessage());
         }
-        
-        Product existingProduct = productOptional.get();
-        
-        // Update fields
-        if (updatedProduct.getName() != null) {
-            existingProduct.setName(updatedProduct.getName());
-        }
-        
-        if (updatedProduct.getDescription() != null) {
-            existingProduct.setDescription(updatedProduct.getDescription());
-        }
-        
-        if (updatedProduct.getShortDescription() != null) {
-            existingProduct.setShortDescription(updatedProduct.getShortDescription());
-        }
-        
-        if (updatedProduct.getCategory() != null && updatedProduct.getCategory().getId() != null) {
-            // Update category reference
-            Optional<Category> categoryOptional = categoryRepository.findById(updatedProduct.getCategory().getId());
-            categoryOptional.ifPresent(existingProduct::setCategory);
-        }
-        
-        if (updatedProduct.getPrice() != null) {
-            existingProduct.setPrice(updatedProduct.getPrice());
-        }
-        
-        if (updatedProduct.getCostPrice() != null) {
-            existingProduct.setCostPrice(updatedProduct.getCostPrice());
-        }
-        
-        if (updatedProduct.getOriginalPrice() != null) {
-            existingProduct.setOriginalPrice(updatedProduct.getOriginalPrice());
-        }
-        
-        if (updatedProduct.getDiscount() != null) {
-            existingProduct.setDiscount(updatedProduct.getDiscount());
-        }
-        
-        if (updatedProduct.getSku() != null) {
-            existingProduct.setSku(updatedProduct.getSku());
-        }
-        
-        if (updatedProduct.getBarcode() != null) {
-            existingProduct.setBarcode(updatedProduct.getBarcode());
-        }
-        
-        if (updatedProduct.getImages() != null && !updatedProduct.getImages().isEmpty()) {
-            existingProduct.setImages(updatedProduct.getImages());
-        }
-        
-        if (updatedProduct.getNutritionalInfo() != null) {
-            existingProduct.setNutritionalInfo(updatedProduct.getNutritionalInfo());
-        }
-        
-        if (updatedProduct.getAllergens() != null) {
-            existingProduct.setAllergens(updatedProduct.getAllergens());
-        }
-        
-        if (updatedProduct.getIngredients() != null) {
-            existingProduct.setIngredients(updatedProduct.getIngredients());
-        }
-        
-        if (updatedProduct.getPreparationTime() != null) {
-            existingProduct.setPreparationTime(updatedProduct.getPreparationTime());
-        }
-        
-        if (updatedProduct.getShelfLife() != null) {
-            existingProduct.setShelfLife(updatedProduct.getShelfLife());
-        }
-        
-        if (updatedProduct.getStorageRequirements() != null) {
-            existingProduct.setStorageRequirements(updatedProduct.getStorageRequirements());
-        }
-        
-        existingProduct.setActive(updatedProduct.isActive());
-        existingProduct.setFeatured(updatedProduct.isFeatured());
-        existingProduct.setUpdatedAt(LocalDateTime.now());
-        
-        return productRepository.save(existingProduct);
     }
     
     /**

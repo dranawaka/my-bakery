@@ -60,6 +60,9 @@ public class Product {
     @Column(unique = true)
     private String barcode;
     
+    @Column(name = "image_url")
+    private String imageUrl;
+    
     @ElementCollection
     @CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "image_url")
@@ -89,6 +92,9 @@ public class Product {
     
     @Column(name = "storage_requirements")
     private String storageRequirements;
+    
+    @Column(name = "stock_quantity")
+    private Integer stockQuantity;
     
     private boolean active = true;
     
@@ -219,6 +225,14 @@ public class Product {
         this.barcode = barcode;
     }
     
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+    
     public List<String> getImages() {
         return images;
     }
@@ -275,6 +289,14 @@ public class Product {
         this.storageRequirements = storageRequirements;
     }
     
+    public Integer getStockQuantity() {
+        return stockQuantity;
+    }
+    
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
+    
     public boolean isActive() {
         return active;
     }
@@ -321,5 +343,19 @@ public class Product {
     
     public void setRatingCount(Integer ratingCount) {
         this.ratingCount = ratingCount;
+    }
+    
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", sku='" + sku + '\'' +
+                ", active=" + active +
+                ", category=" + (category != null ? category.getId() : "null") +
+                ", stockQuantity=" + stockQuantity +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
     }
 }
