@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 /**
  * Service class for handling product-related operations.
@@ -46,6 +47,11 @@ public class ProductService {
         // Set default values
         if (product.getStockQuantity() == null) {
             product.setStockQuantity(0);
+        }
+        
+        // Initialize images array if null
+        if (product.getImages() == null) {
+            product.setImages(new ArrayList<>());
         }
         
         product.setCreatedAt(LocalDateTime.now());
@@ -218,7 +224,7 @@ public class ProductService {
                 existingProduct.setImageUrl(updatedProduct.getImageUrl());
             }
             
-            if (updatedProduct.getImages() != null && !updatedProduct.getImages().isEmpty()) {
+            if (updatedProduct.getImages() != null) {
                 existingProduct.setImages(updatedProduct.getImages());
             }
             

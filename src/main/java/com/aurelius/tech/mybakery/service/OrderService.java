@@ -264,9 +264,6 @@ public class OrderService {
         List<OrderItem> processedItems = new ArrayList<>();
         
         for (OrderItem item : order.getItems()) {
-            // Set order ID
-            item.setOrderId(order.getId());
-            
             // Validate product
             Optional<Product> productOptional = productRepository.findById(item.getProductId());
             if (productOptional.isEmpty()) {
@@ -331,6 +328,11 @@ public class OrderService {
     private void updateInventoryForOrder(Order order) {
         for (OrderItem item : order.getItems()) {
             try {
+                // Check if inventory exists, if not create it with default quantity
+                if (!inventoryService.isInStock(item.getProductId(), item.getQuantity())) {
+                    // Create inventory record with default quantity if it doesn't exist
+                    inventoryService.increaseInventory(item.getProductId(), 100); // Default stock
+                }
                 inventoryService.decreaseInventory(item.getProductId(), item.getQuantity());
             } catch (RuntimeException e) {
                 // Log the error but continue processing

@@ -1,9 +1,11 @@
 package com.aurelius.tech.mybakery.config;
 
 import com.aurelius.tech.mybakery.model.Category;
+import com.aurelius.tech.mybakery.model.Inventory;
 import com.aurelius.tech.mybakery.model.Product;
 import com.aurelius.tech.mybakery.model.User;
 import com.aurelius.tech.mybakery.repository.CategoryRepository;
+import com.aurelius.tech.mybakery.repository.InventoryRepository;
 import com.aurelius.tech.mybakery.repository.ProductRepository;
 import com.aurelius.tech.mybakery.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +44,7 @@ public class DataInitializer {
     public CommandLineRunner initData(UserRepository userRepository, 
                                     CategoryRepository categoryRepository,
                                     ProductRepository productRepository,
+                                    InventoryRepository inventoryRepository,
                                     PasswordEncoder passwordEncoder) {
         return args -> {
             // Create admin user if it doesn't exist
@@ -68,6 +71,9 @@ public class DataInitializer {
             
             // Create sample products if they don't exist
             createSampleProducts(categoryRepository, productRepository);
+            
+            // Create sample inventory if it doesn't exist
+            createSampleInventory(productRepository, inventoryRepository);
             
             // Create sample customers if they don't exist
             createSampleCustomers(userRepository, passwordEncoder);
@@ -282,5 +288,31 @@ public class DataInitializer {
         userRepository.save(manager1);
         
         System.out.println("Sample customers and staff created successfully");
+    }
+    
+    /**
+     * Creates sample inventory records for the products.
+     */
+    private void createSampleInventory(ProductRepository productRepository, InventoryRepository inventoryRepository) {
+        // Check if inventory already exists
+        if (inventoryRepository.count() > 0) {
+            return;
+        }
+        
+        // Get all products and create inventory records for them
+        Iterable<Product> products = productRepository.findAll();
+        for (Product product : products) {
+            Inventory inventory = new Inventory();
+            inventory.setProduct(product);
+            inventory.setQuantity(100); // Default stock quantity
+            inventory.setReorderPoint(10); // Default reorder point
+            inventory.setReorderQuantity(20); // Default reorder quantity
+            inventory.setStatus(Inventory.InventoryStatus.IN_STOCK);
+            inventory.setLastUpdated(LocalDateTime.now());
+            
+            inventoryRepository.save(inventory);
+        }
+        
+        System.out.println("Sample inventory created successfully");
     }
 }

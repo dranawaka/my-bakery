@@ -2,6 +2,7 @@ package com.aurelius.tech.mybakery.repository;
 
 import com.aurelius.tech.mybakery.model.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -53,4 +54,13 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
      * @return the number of items in the cart
      */
     long countByCartId(Long cartId);
+    
+    /**
+     * Find cart items by cart ID with product details loaded.
+     *
+     * @param cartId the cart ID to search for
+     * @return a list of cart items with the given cart ID and product details loaded
+     */
+    @Query("SELECT ci FROM CartItem ci JOIN FETCH ci.product WHERE ci.cart.id = :cartId")
+    List<CartItem> findByCartIdWithProduct(Long cartId);
 }

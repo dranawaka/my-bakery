@@ -25,7 +25,7 @@ public class Cart {
     @JoinColumn(name = "user_id")
     private User user;
     
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<CartItem> items = new ArrayList<>();
     
@@ -150,8 +150,9 @@ public class Cart {
     public void recalculateTotalAmount() {
         this.totalAmount = BigDecimal.ZERO;
         for (CartItem item : items) {
-            if (item.getTotalPrice() != null) {
-                this.totalAmount = this.totalAmount.add(item.getTotalPrice());
+            BigDecimal itemTotal = item.getTotalPrice();
+            if (itemTotal != null) {
+                this.totalAmount = this.totalAmount.add(itemTotal);
             }
         }
         this.updatedAt = LocalDateTime.now();

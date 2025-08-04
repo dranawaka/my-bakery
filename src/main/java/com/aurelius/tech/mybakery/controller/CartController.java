@@ -1,6 +1,7 @@
 package com.aurelius.tech.mybakery.controller;
 
 import com.aurelius.tech.mybakery.dto.ApiResponse;
+import com.aurelius.tech.mybakery.dto.CartDTO;
 import com.aurelius.tech.mybakery.model.Cart;
 import com.aurelius.tech.mybakery.service.CartService;
 import jakarta.servlet.http.Cookie;
@@ -66,7 +67,8 @@ public class CartController {
                 cart = cartService.getGuestCart(sessionId);
             }
             
-            return ResponseEntity.ok(ApiResponse.success(cart, "Cart retrieved successfully"));
+            CartDTO cartDTO = new CartDTO(cart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Cart retrieved successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
@@ -120,7 +122,8 @@ public class CartController {
             // Add item to cart
             cart = cartService.addItemToCart(cart.getId(), productId, quantity);
             
-            return ResponseEntity.ok(ApiResponse.success(cart, "Item added to cart successfully"));
+            CartDTO cartDTO = new CartDTO(cart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Item added to cart successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
@@ -137,18 +140,36 @@ public class CartController {
     @PutMapping("/items/{itemId}")
     public ResponseEntity<ApiResponse<?>> updateCartItemQuantity(
             @PathVariable Long itemId,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            HttpServletRequest request,
             @RequestBody Map<String, Object> requestBody) {
         try {
             // Extract quantity from request body
             Integer quantity = Integer.valueOf(requestBody.get("quantity").toString());
             
-            // In a real implementation, we would get the cart ID from the authenticated user or session
-            Long cartId = 1L; // Simulated cart ID
+            Cart cart;
+            
+            if (token != null && !token.isEmpty()) {
+                // Authenticated user - get user ID from token
+                Long userId = 1L; // Simulated user ID
+                cart = cartService.getUserCart(userId);
+            } else {
+                // Guest user - use session ID from cookie
+                String sessionId = getCartSessionId(request);
+                
+                if (sessionId == null) {
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("No cart session found"));
+                }
+                
+                cart = cartService.getGuestCart(sessionId);
+            }
             
             // Update item quantity
-            Cart cart = cartService.updateCartItemQuantity(cartId, itemId, quantity);
+            cart = cartService.updateCartItemQuantity(cart.getId(), itemId, quantity);
             
-            return ResponseEntity.ok(ApiResponse.success(cart, "Cart item updated successfully"));
+            CartDTO cartDTO = new CartDTO(cart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Cart item updated successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
@@ -162,15 +183,34 @@ public class CartController {
      * @return a response entity with the updated cart
      */
     @DeleteMapping("/items/{itemId}")
-    public ResponseEntity<ApiResponse<?>> removeItemFromCart(@PathVariable Long itemId) {
+    public ResponseEntity<ApiResponse<?>> removeItemFromCart(
+            @PathVariable Long itemId,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            HttpServletRequest request) {
         try {
-            // In a real implementation, we would get the cart ID from the authenticated user or session
-            Long cartId = 1L; // Simulated cart ID
+            Cart cart;
+            
+            if (token != null && !token.isEmpty()) {
+                // Authenticated user - get user ID from token
+                Long userId = 1L; // Simulated user ID
+                cart = cartService.getUserCart(userId);
+            } else {
+                // Guest user - use session ID from cookie
+                String sessionId = getCartSessionId(request);
+                
+                if (sessionId == null) {
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("No cart session found"));
+                }
+                
+                cart = cartService.getGuestCart(sessionId);
+            }
             
             // Remove item from cart
-            Cart cart = cartService.removeItemFromCart(cartId, itemId);
+            cart = cartService.removeItemFromCart(cart.getId(), itemId);
             
-            return ResponseEntity.ok(ApiResponse.success(cart, "Item removed from cart successfully"));
+            CartDTO cartDTO = new CartDTO(cart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Item removed from cart successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
@@ -184,15 +224,34 @@ public class CartController {
      * @return a response entity with the updated cart
      */
     @PutMapping("/items/{itemId}/save-for-later")
-    public ResponseEntity<ApiResponse<?>> saveItemForLater(@PathVariable Long itemId) {
+    public ResponseEntity<ApiResponse<?>> saveItemForLater(
+            @PathVariable Long itemId,
+            @RequestHeader(value = "Authorization", required = false) String token,
+            HttpServletRequest request) {
         try {
-            // In a real implementation, we would get the cart ID from the authenticated user or session
-            Long cartId = 1L; // Simulated cart ID
+            Cart cart;
+            
+            if (token != null && !token.isEmpty()) {
+                // Authenticated user - get user ID from token
+                Long userId = 1L; // Simulated user ID
+                cart = cartService.getUserCart(userId);
+            } else {
+                // Guest user - use session ID from cookie
+                String sessionId = getCartSessionId(request);
+                
+                if (sessionId == null) {
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("No cart session found"));
+                }
+                
+                cart = cartService.getGuestCart(sessionId);
+            }
             
             // Save item for later
-            Cart cart = cartService.saveItemForLater(cartId, itemId);
+            cart = cartService.saveItemForLater(cart.getId(), itemId);
             
-            return ResponseEntity.ok(ApiResponse.success(cart, "Item saved for later successfully"));
+            CartDTO cartDTO = new CartDTO(cart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Item saved for later successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
@@ -204,16 +263,34 @@ public class CartController {
      *
      * @return a response entity with the updated cart
      */
-    @DeleteMapping("/clear")
-    public ResponseEntity<ApiResponse<?>> clearCart() {
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<?>> clearCart(
+            @RequestHeader(value = "Authorization", required = false) String token,
+            HttpServletRequest request) {
         try {
-            // In a real implementation, we would get the cart ID from the authenticated user or session
-            Long cartId = 1L; // Simulated cart ID
+            Cart cart;
+            
+            if (token != null && !token.isEmpty()) {
+                // Authenticated user - get user ID from token
+                Long userId = 1L; // Simulated user ID
+                cart = cartService.getUserCart(userId);
+            } else {
+                // Guest user - use session ID from cookie
+                String sessionId = getCartSessionId(request);
+                
+                if (sessionId == null) {
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("No cart session found"));
+                }
+                
+                cart = cartService.getGuestCart(sessionId);
+            }
             
             // Clear cart
-            Cart cart = cartService.clearCart(cartId);
+            cart = cartService.clearCart(cart.getId());
             
-            return ResponseEntity.ok(ApiResponse.success(cart, "Cart cleared successfully"));
+            CartDTO cartDTO = new CartDTO(cart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Cart cleared successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));
@@ -250,7 +327,8 @@ public class CartController {
             // Merge carts
             Cart mergedCart = cartService.mergeGuestCartIntoUserCart(guestCart.getId(), userCart.getId());
             
-            return ResponseEntity.ok(ApiResponse.success(mergedCart, "Carts merged successfully"));
+            CartDTO cartDTO = new CartDTO(mergedCart);
+            return ResponseEntity.ok(ApiResponse.success(cartDTO, "Carts merged successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));

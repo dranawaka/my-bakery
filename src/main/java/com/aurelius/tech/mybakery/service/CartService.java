@@ -46,8 +46,14 @@ public class CartService {
      * @throws RuntimeException if the cart is not found
      */
     public Cart getCartById(Long id) {
-        return cartRepository.findById(id)
+        Cart cart = cartRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
+        
+        // Load cart items with products
+        List<CartItem> items = cartItemRepository.findByCartIdWithProduct(id);
+        cart.setItems(items);
+        
+        return cart;
     }
     
     /**
@@ -69,6 +75,11 @@ public class CartService {
                 cart.setUpdatedAt(LocalDateTime.now());
                 return cartRepository.save(cart);
             }
+            
+            // Load cart items with products
+            List<CartItem> items = cartItemRepository.findByCartIdWithProduct(cart.getId());
+            cart.setItems(items);
+            
             return cart;
         } else {
             // Create new cart for user
@@ -104,6 +115,11 @@ public class CartService {
                 cart.setUpdatedAt(LocalDateTime.now());
                 return cartRepository.save(cart);
             }
+            
+            // Load cart items with products
+            List<CartItem> items = cartItemRepository.findByCartIdWithProduct(cart.getId());
+            cart.setItems(items);
+            
             return cart;
         } else {
             // Create new cart for guest
@@ -149,11 +165,11 @@ public class CartService {
         } else {
             // Create new item
             CartItem newItem = new CartItem(cart, product, quantity);
-            cart.addItem(newItem);
             cartItemRepository.save(newItem);
         }
         
-        // Update cart
+        // Reload cart with items and update
+        cart = getCartById(cartId);
         cart.recalculateTotalAmount();
         cart.setUpdatedAt(LocalDateTime.now());
         return cartRepository.save(cart);

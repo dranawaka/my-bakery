@@ -1,6 +1,7 @@
 package com.aurelius.tech.mybakery.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -33,10 +34,12 @@ public class OrderItem {
     
     @NotNull
     @Column(name = "unit_price", nullable = false)
+    @JsonProperty("price")
     private BigDecimal unitPrice;
     
     @NotNull
     @Column(name = "total_price", nullable = false)
+    @JsonProperty("subtotal")
     private BigDecimal totalPrice;
     
     @Column(name = "special_instructions", columnDefinition = "TEXT")
