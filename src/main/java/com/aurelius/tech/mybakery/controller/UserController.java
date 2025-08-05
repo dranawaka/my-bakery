@@ -184,6 +184,85 @@ public class UserController {
     }
     
     /**
+     * Get addresses for a specific user by user ID.
+     *
+     * @param userId the user ID
+     * @return a response entity with the user's addresses
+     */
+    @GetMapping("/{userId}/addresses")
+    public ResponseEntity<?> getUserAddressesById(@PathVariable Long userId) {
+        try {
+            List<Address> addresses = userService.getUserAddresses(userId);
+            return createSuccessResponse("Addresses retrieved successfully", addresses);
+        } catch (Exception e) {
+            return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Get users by role.
+     *
+     * @param role the user role
+     * @return a response entity with users of the specified role
+     */
+    @GetMapping("/role/{role}")
+    public ResponseEntity<?> getUsersByRole(@PathVariable String role) {
+        try {
+            List<User> users = userService.getUsersByRole(User.Role.valueOf(role.toUpperCase()));
+            return createSuccessResponse("Users retrieved successfully", users);
+        } catch (Exception e) {
+            return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Get active users.
+     *
+     * @return a response entity with active users
+     */
+    @GetMapping("/active")
+    public ResponseEntity<?> getActiveUsers() {
+        try {
+            List<User> users = userService.getActiveUsers();
+            return createSuccessResponse("Active users retrieved successfully", users);
+        } catch (Exception e) {
+            return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Toggle user active status.
+     *
+     * @param id the user ID
+     * @return a response entity with the updated user
+     */
+    @PutMapping("/{id}/toggle-status")
+    public ResponseEntity<?> toggleUserStatus(@PathVariable Long id) {
+        try {
+            User updatedUser = userService.toggleUserStatus(id);
+            return createSuccessResponse("User status updated successfully", updatedUser);
+        } catch (Exception e) {
+            return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
+     * Reset user password.
+     *
+     * @param id the user ID
+     * @return a response entity with a success message
+     */
+    @PostMapping("/{id}/reset-password")
+    public ResponseEntity<?> resetUserPassword(@PathVariable Long id) {
+        try {
+            String newPassword = userService.resetUserPassword(id);
+            return createSuccessResponse("Password reset successfully", Map.of("newPassword", newPassword));
+        } catch (Exception e) {
+            return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    /**
      * Update a user's address.
      *
      * @param id the address ID

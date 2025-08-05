@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import com.aurelius.tech.mybakery.model.Order;
 
 /**
  * Controller for handling analytics-related endpoints.
@@ -142,6 +143,23 @@ public class AnalyticsController {
         try {
             Map<String, Object> summaryData = analyticsService.getDashboardSummary();
             return ResponseEntity.ok(ApiResponse.success(summaryData, "Dashboard summary retrieved successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+    
+    /**
+     * Get recent orders for dashboard.
+     *
+     * @return a response entity with recent orders
+     */
+    @GetMapping("/recent-orders")
+    public ResponseEntity<ApiResponse<?>> getRecentOrders() {
+        try {
+            Map<String, Object> summaryData = analyticsService.getDashboardSummary();
+            List<Order> recentOrders = (List<Order>) summaryData.get("recentOrders");
+            return ResponseEntity.ok(ApiResponse.success(recentOrders, "Recent orders retrieved successfully"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error(e.getMessage()));

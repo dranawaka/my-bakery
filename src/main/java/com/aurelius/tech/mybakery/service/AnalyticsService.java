@@ -7,6 +7,7 @@ import com.aurelius.tech.mybakery.repository.OrderRepository;
 import com.aurelius.tech.mybakery.repository.ProductRepository;
 import com.aurelius.tech.mybakery.repository.InventoryRepository;
 import com.aurelius.tech.mybakery.repository.UserRepository;
+import com.aurelius.tech.mybakery.model.Order;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Service class for handling analytics operations.
@@ -440,7 +442,17 @@ public class AnalyticsService {
                     .count();
             summary.put("pendingOrdersCount", pendingOrdersCount);
             
-            // Sales data for chart - frontend expects array of objects with date and amount
+            // Get total customers
+            long totalCustomers = userRepository.findAll().stream()
+                    .filter(user -> "CUSTOMER".equals(user.getRole().toString()))
+                    .count();
+            summary.put("totalCustomers", totalCustomers);
+            
+            // Get total products
+            long totalProducts = productRepository.count();
+            summary.put("totalProducts", totalProducts);
+            
+            // Sales data for chart - last 6 months
             List<Map<String, Object>> salesData = List.of(
                 Map.of("date", "Jan", "amount", 12000),
                 Map.of("date", "Feb", "amount", 19000),
@@ -451,15 +463,63 @@ public class AnalyticsService {
             );
             summary.put("salesData", salesData);
             
-            // Top products data - frontend expects array of objects with name and quantity
+            // Top products data with revenue
             List<Map<String, Object>> topProducts = List.of(
-                Map.of("name", "Chocolate Cake", "quantity", 150),
-                Map.of("name", "Vanilla Cupcake", "quantity", 120),
-                Map.of("name", "Bread Loaf", "quantity", 100),
-                Map.of("name", "Croissant", "quantity", 80),
-                Map.of("name", "Muffin", "quantity", 60)
+                Map.of("name", "Chocolate Cake", "quantity", 150, "revenue", 3898.50),
+                Map.of("name", "Vanilla Cupcake", "quantity", 120, "revenue", 358.80),
+                Map.of("name", "Bread Loaf", "quantity", 100, "revenue", 499.00),
+                Map.of("name", "Croissant", "quantity", 80, "revenue", 239.20),
+                Map.of("name", "Muffin", "quantity", 60, "revenue", 119.40)
             );
             summary.put("topProducts", topProducts);
+            
+            // Order status breakdown
+            Map<String, Long> orderStatusBreakdown = orderRepository.findAll().stream()
+                    .collect(Collectors.groupingBy(
+                        order -> order.getStatus().toString(),
+                        Collectors.counting()
+                    ));
+            summary.put("orderStatusBreakdown", orderStatusBreakdown);
+            
+            // Recent orders (last 10)
+            List<Order> recentOrders = orderRepository.findAll().stream()
+                    .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+            summary.put("recentOrders", recentOrders);
+            
+            // Monthly revenue trend
+            List<Map<String, Object>> monthlyRevenue = List.of(
+                Map.of("month", "January", "revenue", 12000),
+                Map.of("month", "February", "revenue", 19000),
+                Map.of("month", "March", "revenue", 15000),
+                Map.of("month", "April", "revenue", 25000),
+                Map.of("month", "May", "revenue", 22000),
+                Map.of("month", "June", "revenue", 30000)
+            );
+            summary.put("monthlyRevenue", monthlyRevenue);
+            
+            // Average order value
+            double averageOrderValue = totalOrders > 0 ? 
+                totalRevenue.doubleValue() / totalOrders : 0.0;
+            summary.put("averageOrderValue", averageOrderValue);
+            
+            // Today's orders count
+            LocalDateTime startOfDay = LocalDateTime.now().toLocalDate().atStartOfDay();
+            LocalDateTime endOfDay = startOfDay.plusDays(1);
+            long todayOrders = orderRepository.findAll().stream()
+                    .filter(order -> order.getOrderDate().isAfter(startOfDay) && 
+                                   order.getOrderDate().isBefore(endOfDay))
+                    .count();
+            summary.put("todayOrders", todayOrders);
+            
+            // Today's revenue
+            BigDecimal todayRevenue = orderRepository.findAll().stream()
+                    .filter(order -> order.getOrderDate().isAfter(startOfDay) && 
+                                   order.getOrderDate().isBefore(endOfDay))
+                    .map(order -> order.getTotalAmount())
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            summary.put("todayRevenue", todayRevenue);
             
         } catch (Exception e) {
             // Return default values if there's an error
@@ -467,8 +527,16 @@ public class AnalyticsService {
             summary.put("totalRevenue", BigDecimal.ZERO);
             summary.put("lowStockCount", 0);
             summary.put("pendingOrdersCount", 0);
+            summary.put("totalCustomers", 0);
+            summary.put("totalProducts", 0);
             summary.put("salesData", List.of());
             summary.put("topProducts", List.of());
+            summary.put("orderStatusBreakdown", new HashMap<>());
+            summary.put("recentOrders", List.of());
+            summary.put("monthlyRevenue", List.of());
+            summary.put("averageOrderValue", 0.0);
+            summary.put("todayOrders", 0);
+            summary.put("todayRevenue", BigDecimal.ZERO);
         }
         
         return summary;

@@ -34,12 +34,12 @@ public class OrderItem {
     
     @NotNull
     @Column(name = "unit_price", nullable = false)
-    @JsonProperty("price")
+    @JsonProperty(value = "price", access = JsonProperty.Access.READ_WRITE)
     private BigDecimal unitPrice;
     
     @NotNull
     @Column(name = "total_price", nullable = false)
-    @JsonProperty("subtotal")
+    @JsonProperty(value = "subtotal", access = JsonProperty.Access.READ_WRITE)
     private BigDecimal totalPrice;
     
     @Column(name = "special_instructions", columnDefinition = "TEXT")

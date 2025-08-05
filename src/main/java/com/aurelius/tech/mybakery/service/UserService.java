@@ -147,24 +147,71 @@ public class UserService {
     }
     
     /**
-     * Activate or deactivate a user.
+     * Set a user's active status.
      *
      * @param id the user's ID
-     * @param active whether the user should be active
+     * @param active the active status to set
      * @return the updated user
      * @throws RuntimeException if the user is not found
      */
     public User setUserActive(Long id, boolean active) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException("User not found");
-        }
-        
-        User user = userOptional.get();
+        User user = getUserById(id);
         user.setActive(active);
         user.setUpdatedAt(LocalDateTime.now());
-        
         return userRepository.save(user);
+    }
+    
+    /**
+     * Toggle a user's active status.
+     *
+     * @param id the user's ID
+     * @return the updated user
+     * @throws RuntimeException if the user is not found
+     */
+    public User toggleUserStatus(Long id) {
+        User user = getUserById(id);
+        user.setActive(!user.isActive());
+        user.setUpdatedAt(LocalDateTime.now());
+        return userRepository.save(user);
+    }
+    
+    /**
+     * Reset a user's password to a random password.
+     *
+     * @param id the user's ID
+     * @return the new password
+     * @throws RuntimeException if the user is not found
+     */
+    public String resetUserPassword(Long id) {
+        User user = getUserById(id);
+        
+        // Generate a random password
+        String newPassword = generateRandomPassword();
+        
+        // In a real application, you would hash this password
+        // For now, we'll store it as plain text (not recommended for production)
+        user.setPassword(newPassword);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+        
+        return newPassword;
+    }
+    
+    /**
+     * Generate a random password.
+     *
+     * @return a random password string
+     */
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+        StringBuilder password = new StringBuilder();
+        java.util.Random random = new java.util.Random();
+        
+        for (int i = 0; i < 12; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        
+        return password.toString();
     }
     
     /**
