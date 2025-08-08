@@ -1,0 +1,17 @@
+target/
+!target/*.jar
+.git
+.gitignore
+README.md
+*.md
+docs/
+postman/
+reports/
+test-cart.html
+.idea/
+*.iml
+.vscode/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
