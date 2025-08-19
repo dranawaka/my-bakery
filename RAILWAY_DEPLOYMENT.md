@@ -33,6 +33,14 @@ CLOUDINARY_API_KEY=your-cloudinary-api-key
 CLOUDINARY_API_SECRET=your-cloudinary-api-secret
 FILE_UPLOAD_DIR=/tmp/uploads
 LOG_FILE=/tmp/application.log
+
+# CORS Configuration
+CORS_ALLOWED_ORIGINS=https://*.railway.app,https://*.vercel.app,https://*.netlify.app,http://localhost:3000,http://localhost:3001
+CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS,PATCH
+CORS_ALLOWED_HEADERS=*
+CORS_EXPOSED_HEADERS=x-auth-token,Authorization,Content-Type,Accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers
+CORS_ALLOW_CREDENTIALS=true
+CORS_MAX_AGE=3600
 ```
 
 ### 4. Add PostgreSQL Database
